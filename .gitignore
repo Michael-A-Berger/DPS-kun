@@ -1,3 +1,10 @@
+# ==================================
+# ===== DPS-kun Specific Files =====
+# ==================================
+permissions_log.txt
+commands/remy_links.json
+commands/remy_log.txt
+
 # Logs
 logs
 *.log

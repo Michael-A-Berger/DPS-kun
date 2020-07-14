@@ -1,0 +1,28 @@
+{
+  "name": "DPS-kun",
+  "version": "1.0.0",
+  "description": "A Discord bot for rhythm game communities",
+  "main": "dps-kun.js",
+  "scripts": {
+    "start": "node dps-kun.js",
+    "dev": "node -r dotenv/config dps-kun.js",
+    "pretest": "eslint ./ --fix",
+    "test-bot": "eslint ./dps-kun.js --fix",
+    "test-commands": "eslint ./commands --fix",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Michael Berger",
+  "license": "ISC",
+  "dependencies": {
+    "discord.js": "^11.6.4"
+  },
+  "devDependencies": {
+    "dotenv": "^8.2.0",
+    "eslint": "^7.4.0",
+    "eslint-config-airbnb": "^18.2.0",
+    "eslint-plugin-import": "^2.22.0",
+    "eslint-plugin-jsx-a11y": "^6.3.1",
+    "eslint-plugin-react": "^7.20.3",
+    "eslint-plugin-react-hooks": "^4.0.8"
+  }
+}
