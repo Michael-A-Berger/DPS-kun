@@ -187,23 +187,96 @@ function PromoteRole(message, cmd) {
         });
 
       sendReply(message, `\:passport_control: Members with the ${roleToPromote} role now have bot master permissions!`
-                                + ` Type \`${commandToken}bothelp\` to see all bot master commands.`);
+                        + ` Type \`${commandToken}bothelp\` to see all bot master commands.`);
     } else {
       sendReply(message, `\:warning: Members with the ${roleToPromote} role already have bot master permissions! `
-                                + '(There\'s no need to promote them any further.)');
+                        + '(There\'s no need to promote them any further.)');
     }
   } else {
     sendReply(message, `\:grey_question: The role "${roleToPromote}" doesn't exist on the server! Please `
-                            + 'choose an existing role to promote. (Note: This command is case-sensitive.)');
+                      + 'choose an existing role to promote. (Note: This command is case-sensitive.)');
   }
 }
 
-// DemoteCommand()
-function DemoteCommand(message) {
+// DemoteRole()
+function DemoteRole(message, cmd) {
+  const roleToDemote = cmd.substring(7);
+  const serverRole = message.guild.roles.find('name', roleToDemote);
 
+  if (serverRole) {
+    const roleIndex = botMasters.indexOf(serverRole.id);
+    if (roleIndex !== -1) {
+      if (botMasters.length > 1) { botMasters = botMasters.splice(roleIndex, 1); } else { botMasters = []; }
+      writeMemberFile(botMasterFile, botMasters);
+      fs.appendFile(permissionsLog, `${message.id}: ${message.author.username} demoted ${roleToDemote}${newlineChar}`,
+        (err) => {
+          if (err) { console.log(`${err}\n`); }
+        });
+
+      sendReply(message, `\:lock: Bot master permissions for members with the ${roleToDemote} role `
+                        + 'have been revoked!');
+    } else {
+      sendReply(message, `\:warning: Users with the ${roleToDemote} role don't have bot master permissions! If `
+                        + `you wish to disable a member from using bot commands altogether, use the \`${commandToken
+                        }blacklist\` command.`);
+    }
+  } else {
+    sendReply(message, `\:grey_question: The role "${roleToDemote}" doesn't exist on the server! Please `
+                      + 'choose an existing role to demote. (Note: This command is case-sensitive.)');
+  }
 }
 
-// When the Discord module is ready
+// Blacklist()
+function Blacklist(message, cmd) {
+  let subcommand = cmd.substring(10).trim();
+  let greaterThanLoc = subcommand.indexOf('>');
+  const remove = subcommand.startsWith('remove');
+
+  if (remove) {
+    subcommand = subcommand.substring(6).trim();
+    greaterThanLoc = subcommand.indexOf('>');
+
+    if (subcommand.startsWith('<@') && greaterThanLoc > 2) {
+      const memberID = subcommand.substring(2, greaterThanLoc).replace(/!/g, '');
+      const memberIndex = blacklist.indexOf(memberID);
+      const foundInGuild = message.guild.members.find('id', memberID);
+
+      if (memberIndex !== -1 && foundInGuild) {
+        if (blacklist.length > 1) { blacklist = blacklist.splice(memberIndex, 1); } else { blacklist = []; }
+        writeMemberFile(blacklistFile, blacklist);
+        fs.appendFile(permissionsLog, `${message.id}: ${message.author.username} removed ${foundInGuild.user.username} from the blacklist${newlineChar}`,
+          (err) => {
+            if (err) { console.log(`${err}\n`); }
+          });
+
+        sendReply(message, '\:white_check_mark: That user has been removed from the blacklist!');
+      } else if (!foundInGuild && memberIndex !== -1) {
+        sendReply(message, '\:warning: That member is not on the server anymore! If you would like to remove them from the blacklist, please '
+                                              + 'contact Michael Berger.');
+      } else if (memberIndex === -1 && foundInGuild) { sendReply(message, '\:warning: That member is not on the blacklist!'); }
+    } else { sendReply(message, '\:no_entry: A member must be specified before they can be removed from the blacklist!'); }
+  } else
+  if (subcommand.startsWith('<@') && greaterThanLoc > 2) {
+    const memberID = subcommand.substring(2, greaterThanLoc).replace(/!/g, '');
+    const foundInGuild = message.guild.members.find('id', memberID);
+
+    if (foundInGuild) {
+      blacklist.push(memberID);
+      writeMemberFile(blacklistFile, blacklist);
+      fs.appendFile(permissionsLog, `${message.id}: ${message.author.username} added ${foundInGuild.user.username} to the blacklist${newlineChar}`,
+        (err) => {
+          if (err) { console.log(`${err}\n`); }
+        });
+
+      sendReply(message, '\:no_pedestrians: That member has been added to the blacklist!');
+    } else {
+      sendReply(message, '\:warning: That user is not an active member! Only active server members can be '
+                                              + 'added to the blacklist.');
+    }
+  } else { sendReply(message, '\:no_entry: A member must be specified before they can be added to the blacklist!'); }
+}
+
+// When the Discord module is ready, print to the console that the bot is ready
 discordClient.on('ready', () => {
   console.log('DPS-kun is Ready!\n');
 });
@@ -212,12 +285,13 @@ discordClient.on('ready', () => {
 discordClient.on('message', (message) => {
   // Getting the message context variables
   const hasCommandToken = message.content.startsWith(commandToken);
-  let masterCommand = (message.author.id == ownerID);
+  let masterCommand = (message.author.id === ownerID);
   const commandInDM = (message.channel.type === 'dm' || message.channel.type === 'group');
   let userOnBlacklist = false;
   if (blacklist.includes(message.author.id) && !masterCommand) { userOnBlacklist = true; }
-  for (var num = 0; num < botMasters.length; num++) {
-    if (!commandInDM && message.member.roles !== undefined && message.member.roles.has(botMasters[num])) {
+  for (let num = 0; num < botMasters.length; num++) {
+    if (!commandInDM && message.member.roles !== undefined
+        && message.member.roles.has(botMasters[num])) {
       masterCommand = true;
       num = botMasters.length;
     }
@@ -227,8 +301,8 @@ discordClient.on('message', (message) => {
   let cmd;
   let firstSpace = -1;
   if (hasCommandToken) {
-    message.content = message.content.replace(/\n/g, '').replace(/  */g, ' ');
-    cmd = message.content.substring(1).trim();
+    cmd = message.content.replace(/\n/g, '').replace(/  */g, ' ');
+    cmd = cmd.substring(1).trim();
     firstSpace = cmd.indexOf(' ');
     console.log(`[${message.content}]`);
   }
@@ -243,7 +317,7 @@ discordClient.on('message', (message) => {
 
       let found = false;
       for (counter = 0; counter < commands.length && !found; counter++) {
-        for (var num = 0; num < commands[counter].keywords.length && !found; num++) {
+        for (let num = 0; num < commands[counter].keywords.length && !found; num++) {
           if (cmd.toLowerCase().substring(0, (firstSpace > 0 ? firstSpace : cmd.length)) === commands[counter].keywords[num]) {
             if (!commands[counter].restricted || !commandInDM) {
               message.content = cmd.substring(commands[counter].keywords[num].length).trim();
@@ -290,30 +364,7 @@ discordClient.on('message', (message) => {
       if (!found && cmd.startsWith('demote')) {
         if (masterCommand && !commandInDM) {
           if (firstSpace < 1) { sendReply(message, 'Proper Usage: `!demote [server role]`'); } else {
-            const roleToDemote = cmd.substring(7);
-            const serverRole = message.guild.roles.find('name', roleToDemote);
-
-            if (serverRole) {
-              const roleIndex = botMasters.indexOf(serverRole.id);
-              if (roleIndex !== -1) {
-                if (botMasters.length > 1) { botMasters = botMasters.splice(roleIndex, 1); } else { botMasters = []; }
-                writeMemberFile(botMasterFile, botMasters);
-                fs.appendFile(permissionsLog, `${message.id}: ${message.author.username} demoted ${roleToDemote}${newlineChar}`,
-                  (err) => {
-                    if (err) { console.log(`${err}\n`); }
-                  });
-
-                sendReply(message, `\:lock: Bot master permissions for members with the ${roleToDemote} role `
-                                                    + 'have been revoked!');
-              } else {
-                sendReply(message, `\:warning: Users with the ${roleToDemote} role don't have bot master permissions! If `
-                                                    + `you wish to disable a member from using bot commands altogether, use the \`${commandToken
-                                                    }blacklist\` command.`);
-              }
-            } else {
-              sendReply(message, `\:grey_question: The role "${roleToDemote}" doesn't exist on the server! Please `
-                                                + 'choose an existing role to demote. (Note: This command is case-sensitive.)');
-            }
+            DemoteRole(message, cmd);
           }
         } else if (commandInDM) { MustBeInServerError(message); }
 
@@ -324,58 +375,11 @@ discordClient.on('message', (message) => {
       if (!found && cmd.startsWith('blacklist')) {
         if (masterCommand && !commandInDM) {
           if (firstSpace < 1 || cmd.endsWith('help')) {
-            sendReply(message, `Proper Usage:\n\`\`\`${
-              commandToken}blacklist @[username]\n- Adds a user to the bot blacklist (they will be unable to `
-                                            + `issue bot commands)\n\n${
-                                              commandToken}blacklist remove @[username]\n- Removes a user from the bot blacklist\`\`\``);
+            sendReply(message, `Proper Usage:\n\`\`\`${commandToken}blacklist @[username]\n- Adds a user to the `
+                              + `bot blacklist (they will be unable to issue bot commands)\n\n${commandToken}`
+                              + 'blacklist remove @[username]\n- Removes a user from the bot blacklist```');
           } else {
-            let subcommand = cmd.substring(10).trim();
-            let greaterThanLoc = subcommand.indexOf('>');
-            const remove = subcommand.startsWith('remove');
-
-            if (remove) {
-              subcommand = subcommand.substring(6).trim();
-              greaterThanLoc = subcommand.indexOf('>');
-
-              if (subcommand.startsWith('<@') && greaterThanLoc > 2) {
-                var memberID = subcommand.substring(2, greaterThanLoc);
-                const memberIndex = blacklist.indexOf(memberID);
-                var foundInGuild = message.guild.members.find('id', memberID);
-
-                if (memberIndex !== -1 && foundInGuild) {
-                  if (blacklist.length > 1) { blacklist = blacklist.splice(memberIndex, 1); } else { blacklist = []; }
-                  writeMemberFile(blacklistFile, blacklist);
-                  fs.appendFile(permissionsLog, `${message.id}: ${message.author.username} removed ${foundInGuild.user.username} from the blacklist${newlineChar}`,
-                    (err) => {
-                      if (err) { console.log(`${err}\n`); }
-                    });
-
-                  sendReply(message, '\:white_check_mark: That user has been removed from the blacklist!');
-                } else if (!foundInGuild && memberIndex !== -1) {
-                  sendReply(message, '\:warning: That member is not on the server anymore! If you would like to remove them from the blacklist, please '
-                                                        + 'contact Michael Berger.');
-                } else if (memberIndex === -1 && foundInGuild) { sendReply(message, '\:warning: That member is not on the blacklist!'); }
-              } else { sendReply(message, '\:no_entry: A member must be specified before they can be removed from the blacklist!'); }
-            } else
-            if (subcommand.startsWith('<@') && greaterThanLoc > 2) {
-              var memberID = subcommand.substring(2, greaterThanLoc);
-
-              var foundInGuild = message.guild.members.find('id', memberID);
-
-              if (foundInGuild) {
-                blacklist.push(memberID);
-                writeMemberFile(blacklistFile, blacklist);
-                fs.appendFile(permissionsLog, `${message.id}: ${message.author.username} added ${foundInGuild.user.username} to the blacklist${newlineChar}`,
-                  (err) => {
-                    if (err) { console.log(`${err}\n`); }
-                  });
-
-                sendReply(message, '\:no_pedestrians: That member has been added to the blacklist!');
-              } else {
-                sendReply(message, '\:warning: That user is not an active member! Only active server members can be '
-                                                        + 'added to the blacklist.');
-              }
-            } else { sendReply(message, '\:no_entry: A member must be specified before they can be added to the blacklist!'); }
+            Blacklist(message, cmd);
           }
 
           found = true;
@@ -420,4 +424,5 @@ discordClient.on('message', (message) => {
   // IF the bot was mentioned...
 });
 
+// Logging into Discord
 discordClient.login(discordAuth.api_key);

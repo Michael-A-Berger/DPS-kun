@@ -1,7 +1,7 @@
 module.exports = {
   env: {
-    browser: true,
     es2020: true,
+    node: true,
   },
   extends: [
     'airbnb/base',
@@ -15,5 +15,6 @@ module.exports = {
     'no-plusplus': 'off',
     'no-console': 0,
     'no-useless-escape': 'off',
+    'max-len': 'off',
   },
 };

@@ -2,6 +2,7 @@
 # ===== DPS-kun Specific Files =====
 # ==================================
 permissions_log.txt
+bot_masters.txt
 commands/remy_links.json
 commands/remy_log.txt
 
