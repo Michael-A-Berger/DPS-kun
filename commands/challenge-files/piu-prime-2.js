@@ -2,7 +2,7 @@
 module.exports.challenge = {
   identities: ['piu', 'pumpitup', 'piuprime2', 'prime2'],
   title: 'Pump It Up Prime 2',
-  author: 'V8_Ninja',
+  author: 'Michael Berger',
   load: loadSongsFile,
   get: getChallenge,
 };
@@ -41,20 +41,20 @@ const songDiffRegex = /[sdSD]\d+$/g;
 const allSongs = [];
 
 // Getting the appropriate newline character
-const newlineChar = '\r\n';	// i still dont know
+const newlineChar = '\r\n'; // i still dont know
 
 // printSong()
 function printSong(song) {
   let charts = '';
   let unlocks = '';
-  for (var num = 0; num < song.charts.length; num++) { charts += song.charts[num] + (num + 1 < song.charts.length ? ', ' : ''); }
-  for (var num = 0; num < song.unlocks.length; num++) { unlocks += song.unlocks[num] + (num + 1 < song.unlocks.length ? ', ' : ''); }
+  for (let num = 0; num < song.charts.length; num++) { charts += song.charts[num] + (num + 1 < song.charts.length ? ', ' : ''); }
+  for (let num = 0; num < song.unlocks.length; num++) { unlocks += song.unlocks[num] + (num + 1 < song.unlocks.length ? ', ' : ''); }
 
   console.log(`==${song.name}==\nArtist:\t\t${song.artist
-				 }\nBPM:\t\t${song.bpm}\nCharts:\t\t${charts
-				 }\nUnlocks:\t${unlocks}\nSeries:\t\t${song.series
-				 }\nChannel:\t${song.channel}\nVersion:\t${song.version
-				 }\nType:\t\t${song.type}\n`);
+  }\nBPM:\t\t${song.bpm}\nCharts:\t\t${charts
+  }\nUnlocks:\t${unlocks}\nSeries:\t\t${song.series
+  }\nChannel:\t${song.channel}\nVersion:\t${song.version
+  }\nType:\t\t${song.type}\n`);
 }
 
 // loadSongsFile()
@@ -78,7 +78,7 @@ function loadSongsFile() {
       };
 
       // if ((num - 1) % 10 === 0)
-      //	printSong(allSongs[num - 1]);
+      //    printSong(allSongs[num - 1]);
     }
   }
 
@@ -110,7 +110,7 @@ function getChallenge(message) {
 
   // Getting the options
   let optionFound = false;
-  for (var num = 0; num < options.length && stringToReturn === ''; num++) {
+  for (let num = 0; num < options.length && stringToReturn === ''; num++) {
     optionFound = false;
 
     // Getting the difficulty
@@ -122,21 +122,21 @@ function getChallenge(message) {
 
       diffType = options[num].substring(0, 1);
 
-      if (diffType == 's' || diffType == 'd') {
-        const baseDiff = parseInt(options[num].substring(1));
+      if (diffType === 's' || diffType === 'd') {
+        const baseDiff = parseInt(options[num].substring(1), 10);
 
-        if (!isNaN(baseDiff)) {
+        if (!Number.isNaN(baseDiff)) {
           optionFound = true;
           if (diffRange) {
             for (let n = baseDiff - 1; n < baseDiff + 2; n++) { diffLevels.push(diffType.toUpperCase() + n.toString()); }
           } else { diffLevels.push(diffType.toUpperCase() + baseDiff.toString()); }
         } else {
           stringToReturn = '\:warning: You entered an invalid chart rating! Type '
-									+ '`chll prime2 help` to see the range of valid difficulties.';
+                                    + '`chll prime2 help` to see the range of valid difficulties.';
         }
       } else {
         stringToReturn = '\:warning: You entered an invalid chart type! Type `chll '
-								+ 'prime2 help` to see the valid chart types.';
+                                + 'prime2 help` to see the valid chart types.';
       }
     }
 
@@ -146,22 +146,22 @@ function getChallenge(message) {
         // Don't change the array, it's the "normal" type
         optionFound = true;
         break;
-      case 1:		// Short
+      case 1: // Short
         validTypes = ['Short'];
         validChannels = [];
         optionFound = true;
         break;
-      case 2:		// Full
+      case 2: // Full
         validTypes = ['Full'];
         validChannels = [];
         optionFound = true;
         break;
-      case 3:		// Remix
+      case 3: // Remix
         validTypes = ['Remix'];
         validChannels = [];
         optionFound = true;
         break;
-      case 4:		// [All Types]
+      case 4: // [All Types]
         validTypes.push('Short');
         validTypes.push('Full');
         validTypes.push('Remix');
@@ -173,23 +173,23 @@ function getChallenge(message) {
 
     // Getting the song channel
     switch (songChannels.indexOf(options[num])) {
-      case 0:		// Original
+      case 0: // Original
         validChannels.push('Original');
         optionFound = true;
         break;
-      case 1:		// K-Pop
+      case 1: // K-Pop
         validChannels.push('K-Pop');
         optionFound = true;
         break;
-      case 2:		// J-Music
+      case 2: // J-Music
         validChannels.push('J-Music');
         optionFound = true;
         break;
-      case 3:		// World
+      case 3: // World
         validChannels.push('World');
         optionFound = true;
         break;
-      case 4:		// Xross
+      case 4: // Xross
         validChannels.push('Xross');
         optionFound = true;
         break;
@@ -251,9 +251,9 @@ function getChallenge(message) {
 
     // Noticing that gimmicks should be applied
     if (options[num].startsWith('gimmick')) {
-      gimmickCount = parseInt(options[num].replace('gimmick', ''));
+      gimmickCount = parseInt(options[num].replace('gimmick', ''), 10);
 
-      if (isNaN(gimmickCount)) { gimmickCount = 1; }
+      if (Number.isNaN(gimmickCount)) { gimmickCount = 1; }
 
       if (gimmickCount > 4) { gimmickCount = 4; }
 
@@ -263,24 +263,24 @@ function getChallenge(message) {
     // IF no option was found...
     if (!optionFound) {
       stringToReturn = '\:grey_question: You entered an invalid option! Type `chll prime2 help` to see '
-								+ 'a list of available challenge options.';
+                                + 'a list of available challenge options.';
     }
   }
 
   // TEST TEST TEST
   // console.log("\ndiffLevels:\t" + diffLevels.length);
   // if (diffLevels.length > 0)
-  //	console.log(diffLevels);
+  //    console.log(diffLevels);
   // console.log("unlocks:\t" + searchUnlocks);
   // console.log("validTypes:\t" + validTypes.length);
   // if (validTypes.length > 0)
-  //	console.log(validTypes);
+  //    console.log(validTypes);
   // console.log("validChannels:\t" + validChannels.length);
   // if (validChannels.length > 0)
-  //	console.log(validChannels);
+  //    console.log(validChannels);
   // console.log("validSeries:\t" + validSeries.length);
   // if (validSeries.length > 0)
-  //	console.log(validSeries);
+  //    console.log(validSeries);
   // console.log("gimmickCount:\t" + gimmickCount);
   // console.log("");
   // TEST TEST TEST
@@ -294,7 +294,7 @@ function getChallenge(message) {
 
       for (let diffNum = 0; diffNum < diffLevels.length; diffNum++) {
         if (allSongs[songNum].charts.includes(diffLevels[diffNum])
-					|| (searchUnlocks && allSongs[songNum].unlocks.includes(diffLevels[diffNum]))) {
+                    || (searchUnlocks && allSongs[songNum].unlocks.includes(diffLevels[diffNum]))) {
           canAdd = true;
           break;
         }
@@ -317,12 +317,12 @@ function getChallenge(message) {
     const chosenSong = validSongs[Math.floor(Math.random() * validSongs.length)];
     const validDiffs = [];
 
-    for (var num = 0; num < chosenSong.charts.length; num++) {
+    for (let num = 0; num < chosenSong.charts.length; num++) {
       if (diffLevels.length === 0 || diffLevels.includes(chosenSong.charts[num])) { validDiffs.push(chosenSong.charts[num]); }
     }
 
     if (searchUnlocks) {
-      for (var num = 0; num < chosenSong.unlocks.length; num++) {
+      for (let num = 0; num < chosenSong.unlocks.length; num++) {
         if (diffLevels.length === 0 || diffLevels.includes(chosenSong.unlocks[num])) { validDiffs.push(chosenSong.charts[num]); }
       }
     }
@@ -330,25 +330,25 @@ function getChallenge(message) {
     const chosenDiff = validDiffs[Math.floor(Math.random() * validDiffs.length)];
 
     stringToReturn += `Play the **${chosenDiff}** chart of **${chosenSong.name}** `
-							+ `(by ${chosenSong.artist})`;
+                            + `(by ${chosenSong.artist})`;
 
     if (gimmickCount > 0) { stringToReturn += `${createGimmicks(gimmickCount)}\n\n`; } else { stringToReturn += '!\n'; }
 
     stringToReturn += `(Channel: ${chosenSong.channel})`;
   } else if (stringToReturn === '') {
     stringToReturn = '\:open_file_folder: No songs could be found with those restrictions! '
-		+ 'Enter `chll prime2 help` to see the list of valid challenge options for this game.';
+        + 'Enter `chll prime2 help` to see the list of valid challenge options for this game.';
   }
 
   if (message.content === 'help' || stringToReturn === '') {
     stringToReturn = 'Proper Usage:\n```challenge piuprime2 [difficulty?] [unlocks?] [type?] '
-						+ '[channel?] [series?] [gimmick?]\n\n'
-						+ '[difficulty?]   = The chart level to retrieve (Format: S## | ~S## | D## | ~D##)\n'
-						+ '[unlocks?]      = Includes unlockable charts (Format: unlocks)\n'
-						+ '[type?]         = Limits the song type (Format: normal | short | full | remix | all)\n'
-						+ '[channel?]      = Limits the song channel (Only works w/ Normal type songs) (Format: original | kpop | jmusic | world | xross)\n'
-						+ '[series?]       = Limits the song origins (Format: prime2 | prime | fiesta2 | fiestaex | fiesta | nx | nxa | prex3 | extra | exceed | zero | perfect | 1st)\n'
-						+ '[gimmick?]      = Add gimmicks to the challenge (Format: gimmick#)\n```';
+                        + '[channel?] [series?] [gimmick?]\n\n'
+                        + '[difficulty?]   = The chart level to retrieve (Format: S## | ~S## | D## | ~D##)\n'
+                        + '[unlocks?]      = Includes unlockable charts (Format: unlocks)\n'
+                        + '[type?]         = Limits the song type (Format: normal | short | full | remix | all)\n'
+                        + '[channel?]      = Limits the song channel (Only works w/ Normal type songs) (Format: original | kpop | jmusic | world | xross)\n'
+                        + '[series?]       = Limits the song origins (Format: prime2 | prime | fiesta2 | fiestaex | fiesta | nx | nxa | prex3 | extra | exceed | zero | perfect | 1st)\n'
+                        + '[gimmick?]      = Add gimmicks to the challenge (Format: gimmick#)\n```';
   }
 
   return stringToReturn;
@@ -358,17 +358,17 @@ function getChallenge(message) {
 function createGimmicks(gimmickNum) {
   let gimmickString = ` with the following gimmick${gimmickNum > 1 ? 's:' : ':'}`;
   const usedGimmicks = [];
-  let chosenGimmick = Math.floor(Math.random() * 6);
+  let chosenGimmick = Math.round(Math.random() * 5);
   let subGimmick = 0;
 
   for (let num = 0; num < gimmickNum; num++) {
-    while (usedGimmicks.indexOf(chosenGimmick) > -1) { chosenGimmick = Math.floor(Math.random() * 6); }
+    while (usedGimmicks.indexOf(chosenGimmick) > -1) { chosenGimmick = Math.round(Math.random() * 5); }
 
     gimmickString += '\n';
 
     switch (chosenGimmick) {
-      case 0:		// Troll Skin
-        subGimmick = Math.floor(Math.random() * 6);
+      case 0: // Troll Skin
+        subGimmick = Math.round(Math.random() * 5);
         gimmickString += '- Note Skin: ';
         switch (subGimmick) {
           case 0:
@@ -390,12 +390,12 @@ function createGimmicks(gimmickNum) {
             gimmickString += 'Soccerball';
             break;
           default:
-            console.log(`yo, something wrong happened (line ${__line})`);
+            // Do nothing, default case is unachievable
             break;
         }
         break;
-      case 1:		// Note Path
-        subGimmick = Math.floor(Math.random() * 6);
+      case 1: // Note Path
+        subGimmick = Math.round(Math.random() * 5);
         gimmickString += '- Note Path: ';
         switch (subGimmick) {
           case 0:
@@ -417,12 +417,12 @@ function createGimmicks(gimmickNum) {
             gimmickString += 'Under Attack (UA)';
             break;
           default:
-            console.log(`yo, something wrong happened (line ${__line})`);
+            // Do nothing, default case is unachievable
             break;
         }
         break;
-      case 2:		// Judgement
-        subGimmick = Math.floor(Math.random() * 2);
+      case 2: // Judgement
+        subGimmick = Math.round(Math.random());
         gimmickString += '- Judgement: ';
         switch (subGimmick) {
           case 0:
@@ -432,12 +432,12 @@ function createGimmicks(gimmickNum) {
             gimmickString += 'Hard Judgement (HJ)';
             break;
           default:
-            console.log(`yo, something wrong happened (line ${__line})`);
+            // Do nothing, default case is unachievable
             break;
         }
         break;
-      case 3:		// Unnatural Speed
-        subGimmick = Math.floor(Math.random() * 4);
+      case 3: // Unnatural Speed
+        subGimmick = Math.round(Math.random() * 3);
         gimmickString += '- Speed: ';
         switch (subGimmick) {
           case 0:
@@ -453,12 +453,12 @@ function createGimmicks(gimmickNum) {
             gimmickString += 'Accelerating (AC)';
             break;
           default:
-            console.log(`yo, something wrong happened (line ${__line})`);
+            // Do nothing, default case is unachievable
             break;
         }
         break;
-      case 4:		// Display
-        subGimmick = Math.floor(Math.random() * 6);
+      case 4: // Display
+        subGimmick = Math.round(Math.random() * 5);
         gimmickString += '- Display: ';
         switch (subGimmick) {
           case 0:
@@ -480,12 +480,12 @@ function createGimmicks(gimmickNum) {
             gimmickString += 'Non-Step (NS)';
             break;
           default:
-            console.log(`yo, something wrong happened (line ${__line})`);
+            // Do nothing, default case is unachievable
             break;
         }
         break;
-      case 5:		// Alternate
-        subGimmick = Math.floor(Math.random() * 2);
+      case 5: // Alternate
+        subGimmick = Math.round(Math.random());
         gimmickString += '- Alternate: ';
         switch (subGimmick) {
           case 0:
@@ -495,12 +495,12 @@ function createGimmicks(gimmickNum) {
             gimmickString += 'Random Step (RS)';
             break;
           default:
-            console.log(`yo, something wrong happened (line ${__line})`);
+            // Do nothing, default case is unachievable
             break;
         }
         break;
       default:
-        console.log(`yo, something wrong happened (line ${__line})`);
+        // Do nothing, default case is unachievable
         break;
     }
 
