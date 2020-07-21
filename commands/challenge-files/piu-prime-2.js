@@ -1,17 +1,7 @@
-// Export Challenge
-module.exports.challenge = {
-  identities: ['piu', 'pumpitup', 'piuprime2', 'prime2'],
-  title: 'Pump It Up Prime 2',
-  author: 'Michael Berger',
-  load: loadSongsFile,
-  get: getChallenge,
-};
-
 // Modules
-const fs = require('fs');
+const database = require(`${__dirname}/../../database.js`);
 
 // Constant Variables
-const songsFile = './database/piu-prime-2.csv';
 const songTypes = ['normal',
   'short',
   'full',
@@ -38,10 +28,7 @@ const songSeries = ['prime2',
 const songDiffRegex = /[sdSD]\d+$/g;
 
 // Game Variables
-const allSongs = [];
-
-// Getting the appropriate newline character
-const newlineChar = '\r\n'; // i still dont know
+let allSongs = [];
 
 // printSong()
 function printSong(song) {
@@ -59,30 +46,7 @@ function printSong(song) {
 
 // loadSongsFile()
 function loadSongsFile() {
-  let fileString = fs.readFileSync(songsFile, 'utf8');
-
-  fileString = fileString.split(newlineChar);
-  for (let num = 1; num < fileString.length; num++) {
-    if (fileString[num].includes(',')) {
-      const songString = fileString[num].split(',');
-      allSongs[num - 1] = {
-        type: songString[0],
-        bpm: +songString[1],
-        artist: songString[2],
-        name: songString[3],
-        version: songString[4],
-        charts: songString[5].split(' '),
-        unlocks: songString[6].split(' '),
-        series: songString[7],
-        channel: songString[8],
-      };
-
-      // if ((num - 1) % 10 === 0)
-      //    printSong(allSongs[num - 1]);
-    }
-  }
-
-  console.log('-- PIU Prime 2 challenge file loaded!');
+  allSongs = database.PIUPrime2;
 }
 
 // getGimmicks()
@@ -509,3 +473,12 @@ function createGimmicks(gimmickNum) {
 
   return gimmickString;
 }
+
+// Export Challenge
+module.exports.challenge = {
+  identities: ['piu', 'pumpitup', 'piuprime2', 'prime2'],
+  title: 'Pump It Up Prime 2',
+  author: 'Michael Berger',
+  load: loadSongsFile,
+  get: getChallenge,
+};

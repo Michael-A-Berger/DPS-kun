@@ -1,17 +1,7 @@
-// Export Challenge
-module.exports.challenge = {
-  identities: ['gcpc', 'groovecoasterpc'],
-  title: 'Groove Coaster PC',
-  author: 'Michael Berger',
-  load: loadSongsFile,
-  get: getChallenge,
-};
-
 // Modules
-const fs = require('fs');
+const database = require(`${__dirname}/../../database.js`);
 
 // Constant Variables
-const songsFile = './database/groove-coaster-pc.csv';
 const songTypes = ['base',
   'unlock',
   'timed',
@@ -25,10 +15,7 @@ const diffNames = ['simple',
   'extra'];
 
 // Game Variables
-const allSongs = [];
-
-// Getting the appropriate newline character
-const newlineChar = '\r\n'; // i still dont know
+let allSongs = [];
 
 // printSong()
 function printSong(song) {
@@ -43,24 +30,7 @@ function printSong(song) {
 
 // loadSongsFile()
 function loadSongsFile() {
-  let fileString = fs.readFileSync(songsFile, 'utf8');
-
-  fileString = fileString.split(newlineChar);
-  for (let num = 1; num < fileString.length; num++) {
-    if (fileString[num].includes(',')) {
-      const songString = fileString[num].split(',');
-      allSongs[num - 1] = {
-        name: songString[0],
-        artist: songString[1],
-        bpm: +songString[2],
-        difficulties: songString[3].split(' '),
-        type: songString[4].toLowerCase(),
-        date: songString[5],
-      };
-    }
-  }
-
-  console.log('-- Groove Coaster PC challenge file loaded!');
+  allSongs = database.GrooveCoasterPC;
 }
 
 // getChallenge()
@@ -222,3 +192,12 @@ function getChallenge(message) {
 
   return stringToReturn;
 }
+
+// Exports
+module.exports.challenge = {
+  identities: ['gcpc', 'groovecoasterpc'],
+  title: 'Groove Coaster PC',
+  author: 'Michael Berger',
+  load: loadSongsFile,
+  get: getChallenge,
+};

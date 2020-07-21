@@ -1,23 +1,8 @@
-// Export Challenge
-module.exports.challenge = {
-  identities: ['msds', 'musedash'],
-  title: 'Muse Dash',
-  author: 'Michael Berger',
-  load: loadSongsFile,
-  get: getChallenge,
-};
-
 // Modules
-const fs = require('fs');
-
-// Constant Variables
-const songsFile = './database/muse-dash.csv';
+const database = require(`${__dirname}/../../database.js`);
 
 // Game Variables
-const allSongs = [];
-
-// Getting the appropriate newline character
-const newlineChar = '\r\n'; // i still dont know
+let allSongs = [];
 
 // printSong()
 function printSong(song) {
@@ -36,29 +21,7 @@ function printSong(song) {
 
 // loadSongsFile()
 function loadSongsFile() {
-  let fileString = fs.readFileSync(songsFile, 'utf8');
-
-  fileString = fileString.split(newlineChar);
-  for (let num = 1; num < fileString.length; num++) {
-    if (fileString[num].includes(',')) {
-      const songString = fileString[num].split(',');
-      allSongs[num - 1] = {
-        name: songString[0],
-        artist: songString[1],
-        length: songString[2],
-        bpm: songString[3],
-        unlockLevel: parseInt(songString[4], 10),
-        easy: parseInt(songString[5], 10),
-        hard: parseInt(songString[6], 10),
-        master: parseInt(songString[7], 10),
-        hidden: parseInt(songString[8], 10),
-        pack: songString[9],
-        cover: songString[10],
-      };
-    }
-  }
-
-  console.log('-- Muse Dash challenge file loaded!');
+  allSongs = database.MuseDash;
 }
 
 // helpMessage()
@@ -369,3 +332,12 @@ function getChallenge(message) {
   // Returning the challenge string
   return stringToReturn;
 }
+
+// Exports
+module.exports.challenge = {
+  identities: ['msds', 'musedash'],
+  title: 'Muse Dash',
+  author: 'Michael Berger',
+  load: loadSongsFile,
+  get: getChallenge,
+};

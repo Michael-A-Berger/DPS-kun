@@ -1,6 +1,7 @@
 // Modules
 const fs = require('fs');
 const Discord = require('discord.js');
+const database = require('./database.js');
 
 // JSON files
 const discordAuth = {
@@ -19,6 +20,11 @@ const commandToken = '!';
 let postingEnabled = true;
 const newlineRegex = /\r?\n/;
 let newlineChar = '';
+
+// Loading the database
+console.log('=== LOADING SONGS DATABASE ===');
+database.LoadSongs();
+console.log('Done loading songs database!\n');
 
 //= ====================================================
 // Determining the Appropriate Newline Character by OS
