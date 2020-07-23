@@ -1,17 +1,7 @@
-// Export Challenge
-module.exports.challenge = {
-  identities: ['gcpc', 'groovecoasterpc'],
-  title: 'Groove Coaster PC',
-  author: 'V8_Ninja',
-  load: loadSongsFile,
-  get: getChallenge,
-};
-
 // Modules
-const fs = require('fs');
+const database = require(`${__dirname}/../../database.js`);
 
 // Constant Variables
-const songsFile = './database/groove-coaster-pc.csv';
 const songTypes = ['base',
   'unlock',
   'timed',
@@ -25,10 +15,7 @@ const diffNames = ['simple',
   'extra'];
 
 // Game Variables
-const allSongs = [];
-
-// Getting the appropriate newline character
-const newlineChar = '\r\n';	// i still dont know
+let allSongs = [];
 
 // printSong()
 function printSong(song) {
@@ -36,31 +23,14 @@ function printSong(song) {
   for (let num = 0; num < song.difficulties.length; num++) { diffs += song.difficulties[num] + (num + 1 < song.difficulties.length ? ', ' : ''); }
 
   console.log(`==${song.name}==\nArtist:\t\t${song.artist
-				 }\nBPM:\t\t${song.bpm}\nDiffs:\t\t${diffs
-				 }\nType:\t\t${song.type}\nDate:\t\t${song.date
-				 }\n`);
+  }\nBPM:\t\t${song.bpm}\nDiffs:\t\t${diffs
+  }\nType:\t\t${song.type}\nDate:\t\t${song.date
+  }\n`);
 }
 
 // loadSongsFile()
 function loadSongsFile() {
-  let fileString = fs.readFileSync(songsFile, 'utf8');
-
-  fileString = fileString.split(newlineChar);
-  for (let num = 1; num < fileString.length; num++) {
-    if (fileString[num].includes(',')) {
-      const songString = fileString[num].split(',');
-      allSongs[num - 1] = {
-        name: songString[0],
-        artist: songString[1],
-        bpm: +songString[2],
-        difficulties: songString[3].split(' '),
-        type: songString[4].toLowerCase(),
-        date: songString[5],
-      };
-    }
-  }
-
-  console.log('-- Groove Coaster PC challenge file loaded!');
+  allSongs = database.GrooveCoasterPC;
 }
 
 // getChallenge()
@@ -78,41 +48,41 @@ function getChallenge(message) {
   const options = message.content.toLowerCase().split(' ');
 
   // Getting the options
-  for (var num = 0; num < options.length && stringToReturn === ''; num++) {
+  for (let num = 0; num < options.length && stringToReturn === ''; num++) {
     // Getting the difficulty
     if (num === 0) {
       switch (diffNames.indexOf(options[0])) {
-        case 0:		// Simple
+        case 0: // Simple
           diffName = true;
           diffLevels.push(0);
           break;
-        case 1:		// Normal
+        case 1: // Normal
           diffName = true;
           diffLevels.push(1);
           break;
-        case 2:		// Hard
+        case 2: // Hard
           diffName = true;
           diffLevels.push(2);
           break;
-        case 3:		// Extra
+        case 3: // Extra
           diffName = true;
           diffLevels.push(3);
           break;
-        default:	// (Not a name, should be a number)
+        default: // (Not a name, should be a number)
           if (options[0].startsWith('~')) {
             diffRange = true;
             options[0] = options[0].substring(1);
           }
 
-          var baseDiff = parseInt(options[0]);
+          const baseDiff = parseInt(options[0], 10);
 
-          if (!isNaN(baseDiff)) {
+          if (!Number.isNaN(baseDiff)) {
             if (diffRange) {
               for (let n = baseDiff - 1; n < baseDiff + 2; n++) { diffLevels.push(n.toString()); }
             } else { diffLevels.push(baseDiff.toString()); }
           } else {
             stringToReturn = '\:warning: You entered an invalid difficulty rating! Type `chll '
-						+ 'gcpc help` to see the range of valid difficulties.';
+                        + 'gcpc help` to see the range of valid difficulties.';
           }
           break;
       }
@@ -120,22 +90,22 @@ function getChallenge(message) {
       // Getting the song types
       if (songTypes.includes(options[num])) {
         switch (songTypes.indexOf(options[num])) {
-          case 1:			// Unlockable songs
+          case 1: // Unlockable songs
             validTypes = ['unlock'];
             break;
-          case 2:			// Timed Free DLC
+          case 2: // Timed Free DLC
             validTypes = ['timed'];
             break;
-          case 3:			// Paid DLC
+          case 3: // Paid DLC
             validTypes = ['paid'];
             break;
-          case 4:			// DLC Only songs
+          case 4: // DLC Only songs
             validTypes = ['timed', 'paid'];
             break;
-          case 5:			// Free (base, unlocked, + timed) songs
+          case 5: // Free (base, unlocked, + timed) songs
             validTypes = ['base', 'unlock', 'timed'];
             break;
-          case 6:			// All songs
+          case 6: // All songs
             console.log('all songs');
             validTypes = ['base', 'unlock', 'timed', 'paid'];
             break;
@@ -156,7 +126,7 @@ function getChallenge(message) {
 
     // Validating the song difficulty
     if (diffName && allSongs[songNum].difficulties.length <= diffLevels[0]) { canAdd = false; } else if (!diffName) {
-      for (var num = 0; num < diffLevels.length; num++) {
+      for (let num = 0; num < diffLevels.length; num++) {
         if (!allSongs[songNum].difficulties.includes(diffLevels[num])) { canAdd = false; } else {
           canAdd = true;
           break;
@@ -203,22 +173,31 @@ function getChallenge(message) {
     }
 
     stringToReturn += `Play **${chosenSong.name}** (by ${chosenSong.artist}) on ${
-							 chosenDiffRank}`;
+      chosenDiffRank}`;
 
     if (gimmick) { stringToReturn += ` using a ${Math.random() * 2 > 1 ? 'NO INFO' : 'JUST'} item`; }
 
     stringToReturn += `!\n(Rating: ${chosenDiff}${gimmick ? '+)' : ')'}`;
   } else if (stringToReturn === '') {
     stringToReturn = '\:open_file_folder: No songs could be found with those restrictions! '
-		+ 'Enter `chll gcpc help` to see the list of valid challenge options for this game.';
+        + 'Enter `chll gcpc help` to see the list of valid challenge options for this game.';
   }
 
   if (message.content === 'help' || stringToReturn === '') {
     stringToReturn = 'Proper Usage:\n```challenge groovecoasterpc [difficulty] [type?] [gimmick?]\n\n'
-							+ '[diffficulty]   = The chart level to retrieve (Format: ## | ~## | simple | normal | hard | extra)\n'
-							+ '[type?]         = Includes/Excludes songs by type (Format: base | unlock | timed | paid | dlc-only | free | all)\n'
-							+ '[gimmick?]      = Adds a gimmick to the challenge (Format: gimmick)```';
+                            + '[diffficulty]   = The chart level to retrieve (Format: ## | ~## | simple | normal | hard | extra)\n'
+                            + '[type?]         = Includes/Excludes songs by type (Format: base | unlock | timed | paid | dlc-only | free | all)\n'
+                            + '[gimmick?]      = Adds a gimmick to the challenge (Format: gimmick)```';
   }
 
   return stringToReturn;
 }
+
+// Exports
+module.exports.challenge = {
+  identities: ['gcpc', 'groovecoasterpc'],
+  title: 'Groove Coaster PC',
+  author: 'Michael Berger',
+  load: loadSongsFile,
+  get: getChallenge,
+};
