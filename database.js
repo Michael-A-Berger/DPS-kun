@@ -14,9 +14,9 @@ const piuPrime2Songs = [];
 // Constant Variables
 const newlineChar = '\r\n';
 
-/* ===================================
- * ===== GAME SPECIFIC FUNCTIONS =====
- * ===================================
+/* ==================================
+ * ===== SONG LOADING FUNCTIONS =====
+ * ==================================
  */
 
 // loadGrooveCoasterPC()
@@ -96,14 +96,19 @@ function loadPiuPrime2() {
   console.log('-- Pump It Up Prime 2 songs loaded!');
 }
 
+/* ===============================
+ * ===== SEARCHING FUNCTIONS =====
+ * ===============================
+ */
+
 // searchMuseDash()
-function searchMuseDash(paramString){
+function searchMuseDash(paramString) {
   // Defining the returning array
   let songMatches = [];
-  
+
   // Splitting up the parameter string
   const params = paramString.toLowerCase().split(' ');
-  
+
   // =================================
   // ===== PARSING SONG CRITERIA =====
   // =================================
@@ -340,13 +345,18 @@ function searchMuseDash(paramString){
 
     return criteriaMet;
   });
-  
+
   // Returning the array of matching songs
   return songMatches;
 }
 
+/* ==========================
+ * ===== HELP FUNCTIONS =====
+ * ==========================
+ */
+
 // museDashHelp()
-function museDashHelp(){
+function museDashHelp() {
   const help = 'Proper Usage:\n```challenge musedash [name:?] [artist:?] [bpm:?] [easy] [hard] '
               + '[master] [hidden] [pack:?]\n\n'
               + '[name:?]    = Song name contains \'?\' (no spaces)\n'

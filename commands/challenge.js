@@ -1,5 +1,4 @@
 // Modules
-const fs = require('fs');
 const database = require(`${__dirname}/../database.js`);
 let grooveCoasterPC = require(`${__dirname}/challenge-files/groove-coaster-pc.js`);
 grooveCoasterPC = grooveCoasterPC.challenge;
@@ -7,32 +6,31 @@ let piuPrime2 = require(`${__dirname}/challenge-files/piu-prime-2.js`);
 piuPrime2 = piuPrime2.challenge;
 
 // Constant Variables
-const filesLocation = `${__dirname}/challenge-files`;
 const gcpcIdentities = ['groovecoasterpc', 'gcpc'];
 const museDashIdentities = ['musedash', 'msds'];
 const piuPrime2Identities = ['piuprime2', 'prime2'];
 
 // supportedGames()
-function supportedGames(message){
+function supportedGames() {
   const gcpcString = gcpcIdentities.toString().replace(',', ', ');
   const msdsString = museDashIdentities.toString().replace(',', ', ');
   const prime2String = piuPrime2Identities.toString().replace(',', ', ');
-  const support = 'Supported Games:\n```'
-                  + 'Groove Coaster PC:    [' + gcpcstring + ']\n'
-                  + 'Muse Dash:            [' + msdsString + ']\n'
-                  + 'Pump It Up Prime 2:   [' + prime2String + ']\n'
+  const support = `${'Supported Games:\n```'
+                  + 'Groove Coaster PC:    ['}${gcpcString}]\n`
+                  + `Muse Dash:            [${msdsString}]\n`
+                  + `Pump It Up Prime 2:   [${prime2String}]\n`
                   + '```';
   return support;
 }
 
 // grooveCoasterPCChallenge()
-function grooveCoasterPcChallenge(message){
+function grooveCoasterPcChallenge(message) {
   grooveCoasterPC.load();
   return grooveCoasterPC.get(message);
 }
 
 // museDashChallenge()
-function museDashChallenge(message){
+function museDashChallenge(message) {
   // Defining the return string + the song + the valid songs
   let returnString;
   let chosenSong;
@@ -66,9 +64,9 @@ function museDashChallenge(message){
     if (message.content.toLowerCase().indexOf('bpm') > -1) { returnString += ` (BPM: ${chosenSong.bpm})`; }
     returnString += `\n(Pack: ${chosenSong.pack})`;
   }
-  
+
   // IF the return string has not been defined yet... (no matches found)
-  if (returnString === undefined){
+  if (returnString === undefined) {
     returnString = '\:open_file_folder: No songs could be found with those restrictions! '
                   + 'Enter `challenge musedash help` to see the list of valid challenge '
                   + 'options for this game.';
@@ -79,7 +77,7 @@ function museDashChallenge(message){
 }
 
 // piuPrime2Challenge()
-function piuPrime2Challenge(message){
+function piuPrime2Challenge(message) {
   piuPrime2.load();
   return piuPrime2.get(message);
 }
@@ -88,31 +86,31 @@ function piuPrime2Challenge(message){
 function challenge(message) {
   let found = false;
   let stringToPrint = '';
-  
+
   // Groove Coaster PC
-  for (let num = 0; !found && num < gcpcIdentities.length; num++){
-    if (message.content.startsWith(gcpcIdentities[num])){
-      stringToPrint = grooveCoasterPcChallenge(message)
+  for (let num = 0; !found && num < gcpcIdentities.length; num++) {
+    if (message.content.startsWith(gcpcIdentities[num])) {
+      stringToPrint = grooveCoasterPcChallenge(message);
       found = true;
     }
   }
-  
+
   // Muse Dash
-  for (let num = 0; !found && num < museDashIdentities.length; num++){
-    if (message.content.startsWith(museDashIdentities[num])){
+  for (let num = 0; !found && num < museDashIdentities.length; num++) {
+    if (message.content.startsWith(museDashIdentities[num])) {
       stringToPrint = museDashChallenge(message);
       found = true;
     }
   }
-  
+
   // PIU Prime 2
-  for (let num = 0; !found && num < piuPrime2Identities.length; num++){
-    if (message.content.startsWith(piuPrime2Identities[num])){
+  for (let num = 0; !found && num < piuPrime2Identities.length; num++) {
+    if (message.content.startsWith(piuPrime2Identities[num])) {
       stringToPrint = piuPrime2Challenge(message);
       found = true;
     }
   }
-  
+
   // List of Supported Games
   if (message.content === 'support') {
     stringToPrint = supportedGames();
@@ -121,10 +119,9 @@ function challenge(message) {
 
   if (!found) {
     stringToPrint = 'Proper Usage:\n```challenge [game] [criteria?]\n\n'
-						+ "[game]       = The game to choose the chart from ('support' lists all supported "
-						+ 'games)\n'
-						+ "[criteria?]  = Restricts chosen song to certain criteria (issue 'challenge [game] "
-						+ "help' to see options)```";
+                    + "[game]       = The game to choose the chart from ('support' lists all supported games)\n"
+                    + "[criteria?]  = Restricts chosen song to certain criteria (issue 'challenge [game] "
+                    + "help' to see options)```";
   }
 
   message.channel.send(stringToPrint);

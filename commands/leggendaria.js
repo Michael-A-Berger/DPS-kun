@@ -1,13 +1,3 @@
-// Exported Command
-module.exports.command = {
-  keywords: ['leggendaria'],
-  description: 'Generates a truly legendary song title',
-  author: 'Michael Berger',
-  restricted: false,
-  secret: true,
-  action: leggendaria,
-};
-
 // Defining the songlist array
 const songlist = [
   'V',
@@ -50,3 +40,13 @@ function leggendaria(message) {
   const chosenSong = songlist[songIndex];
   message.channel.send(`${chosenSong} † LEGGENDARIA`);
 }
+
+// Exported Command
+module.exports.command = {
+  keywords: ['leggendaria'],
+  description: 'Generates a truly legendary song title',
+  author: 'Michael Berger',
+  restricted: false,
+  secret: true,
+  action: leggendaria,
+};

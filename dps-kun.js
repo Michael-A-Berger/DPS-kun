@@ -1,7 +1,6 @@
 // Modules
 const fs = require('fs');
 const Discord = require('discord.js');
-const database = require('./database.js');
 
 // JSON files
 const discordAuth = {
@@ -21,11 +20,6 @@ let postingEnabled = true;
 const newlineRegex = /\r?\n/;
 let newlineChar = '';
 
-// Loading the database
-console.log('=== LOADING SONGS DATABASE ===');
-database.LoadSongs();
-console.log('Done loading songs database!\n');
-
 //= ====================================================
 // Determining the Appropriate Newline Character by OS
 //= ====================================================
@@ -37,8 +31,25 @@ newlineChar = '\r\n';
 // Registering the Commands
 //= =========================
 
+let database = {};
 let commands = [];
 let counter = 0;
+
+// LoadDatabase()
+function LoadDatabase() {
+  console.log('=== LOADING SONGS DATABASE ===');
+  database = require('./database.js');
+  database.LoadSongs();
+  console.log('Done loading songs database!\n');
+}
+LoadDatabase();
+
+// UnloadDatabase()
+function UnloadDatabase() {
+  console.log('=== UNLOADING SONGS DATABASE ===');
+  delete require.cache[require.resolve('./database.js')];
+  console.log('Done unloding songs database!\n');
+}
 
 // LoadCustomCommands()
 function LoadCustomCommands() {
@@ -411,10 +422,15 @@ discordClient.on('message', (message) => {
     // reload
     if (cmd === 'reload' && message.author.id === ownerID) {
       postingEnabled = false;
-      sendReply(message, 'Reloading the custom commands...');
+      sendReply(message, 'Unloading the custom commands...');
       UnloadCustomCommands();
+      sendReply(message, 'Unloading the database...');
+      UnloadDatabase();
+      sendReply(message, 'Reloading the database...');
+      LoadDatabase();
+      sendReply(message, 'Reloading the custom commands...');
       LoadCustomCommands();
-      sendReply(message, 'The custom commands have been retrieved!');
+      sendReply(message, 'Reload completed!');
       postingEnabled = true;
     }
 

@@ -10,7 +10,6 @@
     "test-bot": "eslint ./dps-kun.js --fix",
     "test-database": "eslint ./database.js --fix",
     "test-commands": "eslint ./commands --fix",
-    "test-challenge": "eslint ./commands/challenge-files --fix",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Michael Berger",
