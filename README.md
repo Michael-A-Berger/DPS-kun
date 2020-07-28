@@ -10,7 +10,7 @@ This Discord bot is not 100% ready to go. The biggest ommissions are the followi
 
 If you are a Discord server admin, I urge you to **NOT** add this bot to your server. It requires a decent amount of web development knowledge to maintain, and (IMO) the benefits are not worth that investment.
 
-If you are a web developer with a decent understanding of Node, you already know how to clone ths repository and there's nothing I can do stop you. If you would like to work with me on the project, **[open up a new issue](https://github.com/Michael-A-Berger/Rhythm-Game-CSVs/issues/new/choose)** asking to collaborate and I'll get in contact ASAP.
+If you are a web developer with a decent understanding of Node, you already know how to clone ths repository and there's nothing I can do stop you. If you would like to work with me on the project, **[open up a new issue](https://github.com/Michael-A-Berger/DPS-kun/issues/new/choose)** asking to collaborate and I'll get in contact ASAP.
 
 # Roadmap
 
