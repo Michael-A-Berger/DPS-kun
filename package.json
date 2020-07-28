@@ -7,10 +7,9 @@
     "start": "node dps-kun.js",
     "dev": "node -r dotenv/config dps-kun.js",
     "pretest": "eslint ./ --fix",
-    "test-bot": "eslint ./dps-kun.js --fix",
-    "test-database": "eslint ./database.js --fix",
-    "test-commands": "eslint ./commands --fix",
-    "test-challenge": "eslint ./commands/challenge-files --fix",
+    "lint-bot": "eslint ./dps-kun.js --fix",
+    "lint-database": "eslint ./database.js --fix",
+    "lint-commands": "eslint ./commands --fix",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Michael Berger",

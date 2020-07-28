@@ -1,38 +1,258 @@
 // Modules
-const fs = require('fs');
 const database = require(`${__dirname}/../database.js`);
-let grooveCoasterPC = require(`${__dirname}/challenge-files/groove-coaster-pc.js`);
-grooveCoasterPC = grooveCoasterPC.challenge;
-let piuPrime2 = require(`${__dirname}/challenge-files/piu-prime-2.js`);
-piuPrime2 = piuPrime2.challenge;
 
 // Constant Variables
-const filesLocation = `${__dirname}/challenge-files`;
 const gcpcIdentities = ['groovecoasterpc', 'gcpc'];
 const museDashIdentities = ['musedash', 'msds'];
 const piuPrime2Identities = ['piuprime2', 'prime2'];
+const piuPrime2GimmickMax = 6;
+const iidxMobileIdentities = ['iidxmobile', 'iidxm'];
 
 // supportedGames()
-function supportedGames(message){
+function supportedGames() {
   const gcpcString = gcpcIdentities.toString().replace(',', ', ');
   const msdsString = museDashIdentities.toString().replace(',', ', ');
   const prime2String = piuPrime2Identities.toString().replace(',', ', ');
   const support = 'Supported Games:\n```'
-                  + 'Groove Coaster PC:    [' + gcpcstring + ']\n'
-                  + 'Muse Dash:            [' + msdsString + ']\n'
-                  + 'Pump It Up Prime 2:   [' + prime2String + ']\n'
+                  + `Groove Coaster PC:    [${gcpcString}]\n`
+                  + `Muse Dash:            [${msdsString}]\n`
+                  + `Pump It Up Prime 2:   [${prime2String}]\n`
                   + '```';
   return support;
 }
 
+/* ====================================
+ * ===== CHALLENGE HELPER METHODS =====
+ * ====================================
+ */
+
+// piuPrime2Gimmicks()
+function piuPrime2Gimmicks(gimmickNum) {
+  // Defining the initial variables
+  let gimmickString = '';
+  const usedGimmicks = [];
+  let chosenGimmick = Math.floor(Math.random() * piuPrime2GimmickMax);
+  let subGimmick = -1;
+
+  // Getting the gimmicks
+  for (let num = 0; num < gimmickNum; num++) {
+    while (usedGimmicks.indexOf(chosenGimmick) > -1) {
+      chosenGimmick = Math.floor(Math.random() * piuPrime2GimmickMax);
+    }
+
+    gimmickString += '\n';
+
+    switch (chosenGimmick) {
+      case 0: // Troll Skin
+        subGimmick = Math.floor(Math.random() * 6);
+        gimmickString += '- Note Skin: **';
+        switch (subGimmick) {
+          case 0:
+            gimmickString += 'Flower Card';
+            break;
+          case 1:
+            gimmickString += 'Poker';
+            break;
+          case 2:
+            gimmickString += 'Music';
+            break;
+          case 3:
+            gimmickString += 'Canon';
+            break;
+          case 4:
+            gimmickString += 'Missile';
+            break;
+          case 5:
+            gimmickString += 'Soccerball';
+            break;
+          default:
+            // Do nothing, default case is unachievable
+            break;
+        }
+        gimmickString += '**';
+        break;
+      case 1: // Note Path
+        subGimmick = Math.floor(Math.random() * 6);
+        gimmickString += '- Note Path: **';
+        switch (subGimmick) {
+          case 0:
+            gimmickString += 'NX';
+            break;
+          case 1:
+            gimmickString += 'Drop (DR)';
+            break;
+          case 2:
+            gimmickString += 'Snake (SN)';
+            break;
+          case 3:
+            gimmickString += 'Rise (RI)';
+            break;
+          case 4:
+            gimmickString += 'X';
+            break;
+          case 5:
+            gimmickString += 'Under Attack (UA)';
+            break;
+          default:
+            // Do nothing, default case is unachievable
+            break;
+        }
+        gimmickString += '**';
+        break;
+      case 2: // Judgement
+        subGimmick = Math.round(Math.random());
+        gimmickString += '- Judgement: **';
+        switch (subGimmick) {
+          case 0:
+            gimmickString += 'Reverse Judgement (JR)';
+            break;
+          case 1:
+            gimmickString += 'Hard Judgement (HJ)';
+            break;
+          default:
+            // Do nothing, default case is unachievable
+            break;
+        }
+        gimmickString += '**';
+        break;
+      case 3: // Unnatural Speed
+        subGimmick = Math.floor(Math.random() * 4);
+        gimmickString += '- Speed: **';
+        switch (subGimmick) {
+          case 0:
+            gimmickString += 'Earthworm (EW)';
+            break;
+          case 1:
+            gimmickString += 'Random Velocity (RV)';
+            break;
+          case 2:
+            gimmickString += 'Decelerating (DC)';
+            break;
+          case 3:
+            gimmickString += 'Accelerating (AC)';
+            break;
+          default:
+            // Do nothing, default case is unachievable
+            break;
+        }
+        gimmickString += '**';
+        break;
+      case 4: // Display
+        subGimmick = Math.floor(Math.random() * 6);
+        gimmickString += '- Display: **';
+        switch (subGimmick) {
+          case 0:
+            gimmickString += 'Flicker (FR)';
+            break;
+          case 1:
+            gimmickString += 'Random Skin (RS)';
+            break;
+          case 2:
+            gimmickString += 'Vanish (V)';
+            break;
+          case 3:
+            gimmickString += 'Appear (AP)';
+            break;
+          case 4:
+            gimmickString += 'Freedom (FD)';
+            break;
+          case 5:
+            gimmickString += 'Non-Step (NS)';
+            break;
+          default:
+            // Do nothing, default case is unachievable
+            break;
+        }
+        gimmickString += '**';
+        break;
+      case 5: // Alternate
+        subGimmick = Math.round(Math.random());
+        gimmickString += '- Alternate: **';
+        switch (subGimmick) {
+          case 0:
+            gimmickString += 'Mirror (M)';
+            break;
+          case 1:
+            gimmickString += 'Random Step (RS)';
+            break;
+          default:
+            // Do nothing, default case is unachievable
+            break;
+        }
+        gimmickString += '**';
+        break;
+      default:
+        // Do nothing, default case is unachievable
+        break;
+    }
+
+    usedGimmicks.push(chosenGimmick);
+  }
+
+  // Returning the gimmicks
+  return gimmickString;
+}
+
+/* =======================================
+ * ===== CHALLENGE RETRIEVAL METHODS =====
+ * =======================================
+ */
+
 // grooveCoasterPCChallenge()
-function grooveCoasterPcChallenge(message){
-  grooveCoasterPC.load();
-  return grooveCoasterPC.get(message);
+function grooveCoasterPcChallenge(message) {
+  // Defining the return string + the song + the valid songs
+  let returnString;
+  let chosenSong;
+  let validSongs = [];
+
+  // Getting the help message if requested, otherwise searching the songs
+  if (message.content.endsWith('help')) {
+    let helpWithGimmick = database.GrooveCoasterPCHelp();
+    helpWithGimmick = helpWithGimmick.substring(0, helpWithGimmick.length - 3);
+    helpWithGimmick = helpWithGimmick.replace('[extra]\n\n', '[extra] [gimmick]\n\n');
+    helpWithGimmick += '- [gimmick]   = Adds a gameplay modifier to the challenge\n```';
+    returnString = helpWithGimmick;
+  } else {
+    validSongs = database.SearchGrooveCoasterPC(message.content);
+  }
+
+  // IF the valid songs array is longer than one song, randomly choose a song
+  if (validSongs.length > 1) {
+    chosenSong = validSongs[Math.round(Math.random() * (validSongs.length - 1))];
+  } else if (validSongs.length === 1) { chosenSong = validSongs[0]; }
+
+  // IF a song was chosen, format the return string
+  if (chosenSong !== undefined) {
+    returnString = `\:headphones: <@${message.author.id}> 's CHALLENGE \:headphones:\nPlay`;
+    if (message.content.toLowerCase().indexOf(' extra') > -1) {
+      returnString += ` the **Extra (${chosenSong.extra})** chart of`;
+    } else if (message.content.toLowerCase().indexOf(' hard') > -1) {
+      returnString += ` the **Hard (${chosenSong.hard})** chart of`;
+    } else if (message.content.toLowerCase().indexOf(' normal') > -1) {
+      returnString += ` the **Normal (${chosenSong.normal})** chart of`;
+    } else if (message.content.toLowerCase().indexOf(' simple') > -1) {
+      returnString += ` the **Simple (${chosenSong.simple})** chart of`;
+    }
+    returnString += ` **${chosenSong.name}** (by ${chosenSong.artist})`;
+    if (message.content.toLowerCase().indexOf(' bpm') > -1) { returnString += ` (BPM: ${chosenSong.bpm})`; }
+    if (message.content.toLowerCase().indexOf(' gimmick') > -1) {
+      returnString += `\n(Gimmick: Use the **${(Math.random() * 2 > 1 ? 'NO INFO' : 'JUST')}** item.)`;
+    }
+  }
+
+  // IF the return string has not been defined yet... (no matches found)
+  if (returnString === undefined) {
+    returnString = '\:open_file_folder: No songs could be found with those restrictions! '
+                  + 'Enter `challenge groovecoasterpc help` to see the list of valid challenge '
+                  + 'options for this game.';
+  }
+
+  // Returning the return string
+  return returnString;
 }
 
 // museDashChallenge()
-function museDashChallenge(message){
+function museDashChallenge(message) {
   // Defining the return string + the song + the valid songs
   let returnString;
   let chosenSong;
@@ -45,7 +265,7 @@ function museDashChallenge(message){
     validSongs = database.SearchMuseDash(message.content);
   }
 
-  // IF the valid songs array is longer than one song...
+  // IF the valid songs array is longer than one song, randomly choose a song
   if (validSongs.length > 1) {
     chosenSong = validSongs[Math.round(Math.random() * (validSongs.length - 1))];
   } else if (validSongs.length === 1) { chosenSong = validSongs[0]; }
@@ -53,22 +273,22 @@ function museDashChallenge(message){
   // IF a song was chosen, format the return string
   if (chosenSong !== undefined) {
     returnString = `\:womans_hat: <@${message.author.id}> 's CHALLENGE \:womans_hat:\nPlay`;
-    if (message.content.toLowerCase().indexOf('hidden') > -1) {
+    if (message.content.toLowerCase().indexOf(' hidden') > -1) {
       returnString += ` the **Hidden (${chosenSong.hidden})** chart of`;
-    } else if (message.content.toLowerCase().indexOf('master') > -1) {
+    } else if (message.content.toLowerCase().indexOf(' master') > -1) {
       returnString += ` the **Master (${chosenSong.master})** chart of`;
-    } else if (message.content.toLowerCase().indexOf('hard') > -1) {
+    } else if (message.content.toLowerCase().indexOf(' hard') > -1) {
       returnString += ` the **Hard (${chosenSong.hard})** chart of`;
-    } else if (message.content.toLowerCase().indexOf('easy') > -1) {
+    } else if (message.content.toLowerCase().indexOf(' easy') > -1) {
       returnString += ` the **Easy (${chosenSong.easy})** chart of`;
     }
     returnString += ` **${chosenSong.name}** (by ${chosenSong.artist})`;
-    if (message.content.toLowerCase().indexOf('bpm') > -1) { returnString += ` (BPM: ${chosenSong.bpm})`; }
+    if (message.content.toLowerCase().indexOf(' bpm') > -1) { returnString += ` (BPM: ${chosenSong.bpm})`; }
     returnString += `\n(Pack: ${chosenSong.pack})`;
   }
-  
+
   // IF the return string has not been defined yet... (no matches found)
-  if (returnString === undefined){
+  if (returnString === undefined) {
     returnString = '\:open_file_folder: No songs could be found with those restrictions! '
                   + 'Enter `challenge musedash help` to see the list of valid challenge '
                   + 'options for this game.';
@@ -79,40 +299,171 @@ function museDashChallenge(message){
 }
 
 // piuPrime2Challenge()
-function piuPrime2Challenge(message){
-  piuPrime2.load();
-  return piuPrime2.get(message);
+function piuPrime2Challenge(message) {
+  // piuPrime2.load();
+  // return piuPrime2.get(message);
+
+  // Defining the return string + the song + the valid songs
+  let returnString;
+  let chosenSong;
+  let validSongs = [];
+
+  // Getting the help message if requested, otherwise searching the songs
+  if (message.content.endsWith('help')) {
+    returnString = database.PIUPrime2Help();
+    returnString = returnString.replace('\n\n', ' [gimmick]\n\n');
+    returnString = returnString.substr(0, returnString.length - 3);
+    returnString += '- [gimmick]       = Adds a gameplay modifier to the challenge (append \':#\' for multiple modifiers)\n```';
+  } else {
+    validSongs = database.SearchPIUPrime2(message.content);
+  }
+
+  // IF the valid songs array is longer than one song, randomly choose a song
+  if (validSongs.length > 1) {
+    chosenSong = validSongs[Math.round(Math.random() * (validSongs.length - 1))];
+  } else if (validSongs.length === 1) { chosenSong = validSongs[0]; }
+
+  // IF a song was chosen, then format the string
+  if (chosenSong !== undefined) {
+    returnString = `\:dancer: <@${message.author.id}> 's CHALLENGE \:dancer:\nPlay`;
+
+    // ===== GETTING THE CHART TYPE =====
+    if (message.content.indexOf(' coop') > -1) {
+      // IF the user wanted a co-op chart, choose the first one (Prime 2 songs don't have multiple co-op charts)
+      returnString += ` the **Co-op (x${chosenSong.coop[0]})** chart of`;
+    } else if (message.content.indexOf(' dperformance') > -1) {
+      // ELSE IF the user wanted a DP chart, give it to them
+      let colonPos = message.content.indexOf(' dperformance:');
+      if (colonPos > -1) {
+        colonPos += 14;
+        let toMatch = message.content.substr(colonPos, 3);
+        const range = (toMatch.startsWith('~') ? 1 : 0);
+        toMatch = parseInt(toMatch.replace(/[^\d]/g, ''), 10);
+        toMatch = chosenSong.dPerformance.filter((num) => (num >= toMatch - range && num <= toMatch + range));
+        returnString += ` the **DP${toMatch[Math.floor(Math.random() * toMatch.length)]}** chart of`;
+      } else {
+        returnString += ' a **Double Performance** chart of';
+      }
+    } else if (message.content.indexOf(' sperformance') > -1) {
+      // ELSE IF the user wanted an SP chart, give it to them
+      let colonPos = message.content.indexOf(' sperformance:');
+      if (colonPos > -1) {
+        colonPos += 14;
+        let toMatch = message.content.substr(colonPos, 3);
+        const range = (toMatch.startsWith('~') ? 1 : 0);
+        toMatch = parseInt(toMatch.replace(/[^\d]/g, ''), 10);
+        toMatch = chosenSong.sPerformance.filter((num) => (num >= toMatch - range && num <= toMatch + range));
+        returnString += ` the **SP${toMatch[Math.floor(Math.random() * toMatch.length)]}** chart of`;
+      } else {
+        returnString += ' a **Single Performance** chart of';
+      }
+    } else if (message.content.indexOf(' double') > -1) {
+      // ELSE IF the user wanted a Double chart, give it to them
+      let colonPos = message.content.indexOf(' double:');
+      if (colonPos > -1) {
+        colonPos += 8;
+        let toMatch = message.content.substr(colonPos, 3);
+        const range = (toMatch.startsWith('~') ? 1 : 0);
+        toMatch = parseInt(toMatch.replace(/[^\d]/g, ''), 10);
+        toMatch = chosenSong.double.filter((num) => (num >= toMatch - range && num <= toMatch + range));
+        returnString += ` the **D${toMatch[Math.floor(Math.random() * toMatch.length)]}** chart of`;
+      } else {
+        returnString += ' a **Double** chart of';
+      }
+    } else if (message.content.indexOf(' single') > -1) {
+      // ELSE IF the user wanted a Single chart, give it to them
+      let colonPos = message.content.indexOf(' single:');
+      if (colonPos > -1) {
+        colonPos += 8;
+        let toMatch = message.content.substr(colonPos, 3);
+        const range = (toMatch.startsWith('~') ? 1 : 0);
+        toMatch = parseInt(toMatch.replace(/[^\d]/g, ''), 10);
+        toMatch = chosenSong.single.filter((num) => (num >= toMatch - range && num <= toMatch + range));
+        returnString += ` the **S${toMatch[Math.floor(Math.random() * toMatch.length)]}** chart of`;
+      } else {
+        returnString += ' a **Single** chart of';
+      }
+    }
+
+    // Adding the song name + artist
+    returnString += ` **${chosenSong.name} (${chosenSong.type})** (by ${chosenSong.artist})`;
+
+    // IF the BPM was defined, add it
+    if (message.content.indexOf(' bpm') > -1) {
+      returnString += ` (BPM: ${chosenSong.bpm})`;
+    }
+
+    // IF the Channel was defined, add it
+    if (message.content.indexOf(' channel') > -1) {
+      returnString += ` (Channel: ${chosenSong.channel})`;
+    }
+
+    // IF Gimmicks were requested, add them
+    if (message.content.indexOf(' gimmick') > -1) {
+      // Determining the amount of gimmicks
+      let gimmickNum = message.content.indexOf(' gimmick:');
+      if (gimmickNum > -1) {
+        gimmickNum = parseInt(message.content.substr(gimmickNum + 9, 2), 10);
+      } else { gimmickNum = 1; }
+
+      // Truncating the gimmick amount
+      if (gimmickNum < 1 || Number.isNaN(gimmickNum)) {
+        gimmickNum = 1;
+      } else if (gimmickNum > piuPrime2GimmickMax) {
+        gimmickNum = piuPrime2GimmickMax;
+      }
+
+      // Adding the gimmick intro text
+      returnString += ` with the following gimmick${(gimmickNum > 1 ? 's:' : ':')}`;
+
+      // Defining the gimmicks
+      returnString += piuPrime2Gimmicks(gimmickNum);
+    }
+
+    // Adding the Series
+    returnString += `\n(Series: ${chosenSong.series})`;
+  }
+
+  // IF the return string has not been defined yet... (no matches found)
+  if (returnString === undefined) {
+    returnString = '\:open_file_folder: No songs could be found with those restrictions! '
+                  + 'Enter `challenge piuprime2 help` to see the list of valid challenge '
+                  + 'options for this game.';
+  }
+
+  // Returning the return string
+  return returnString;
 }
 
 // challenge()
 function challenge(message) {
   let found = false;
   let stringToPrint = '';
-  
+
   // Groove Coaster PC
-  for (let num = 0; !found && num < gcpcIdentities.length; num++){
-    if (message.content.startsWith(gcpcIdentities[num])){
-      stringToPrint = grooveCoasterPcChallenge(message)
+  for (let num = 0; !found && num < gcpcIdentities.length; num++) {
+    if (message.content.startsWith(gcpcIdentities[num])) {
+      stringToPrint = grooveCoasterPcChallenge(message);
       found = true;
     }
   }
-  
+
   // Muse Dash
-  for (let num = 0; !found && num < museDashIdentities.length; num++){
-    if (message.content.startsWith(museDashIdentities[num])){
+  for (let num = 0; !found && num < museDashIdentities.length; num++) {
+    if (message.content.startsWith(museDashIdentities[num])) {
       stringToPrint = museDashChallenge(message);
       found = true;
     }
   }
-  
+
   // PIU Prime 2
-  for (let num = 0; !found && num < piuPrime2Identities.length; num++){
-    if (message.content.startsWith(piuPrime2Identities[num])){
+  for (let num = 0; !found && num < piuPrime2Identities.length; num++) {
+    if (message.content.startsWith(piuPrime2Identities[num])) {
       stringToPrint = piuPrime2Challenge(message);
       found = true;
     }
   }
-  
+
   // List of Supported Games
   if (message.content === 'support') {
     stringToPrint = supportedGames();
@@ -121,10 +472,9 @@ function challenge(message) {
 
   if (!found) {
     stringToPrint = 'Proper Usage:\n```challenge [game] [criteria?]\n\n'
-						+ "[game]       = The game to choose the chart from ('support' lists all supported "
-						+ 'games)\n'
-						+ "[criteria?]  = Restricts chosen song to certain criteria (issue 'challenge [game] "
-						+ "help' to see options)```";
+                    + "[game]       = The game to choose the chart from ('support' lists all supported games)\n"
+                    + "[criteria?]  = Restricts chosen song to certain criteria (issue 'challenge [game] "
+                    + "help' to see options)```";
   }
 
   message.channel.send(stringToPrint);
