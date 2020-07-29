@@ -20,9 +20,9 @@ let postingEnabled = true;
 const newlineRegex = /\r?\n/;
 let newlineChar = '';
 
-/* ===============================================================
- * ===== Determining the appropriate Newline Character by OS =====
- * ===============================================================
+/* ===============================================
+ * ===== DETERMINING NEWLINE CHARACTER BY OS =====
+ * ===============================================
  */
 
 process.env.NEWLINE_CHAR = (process.platform === 'win32' ? '\r\n' : '\n');
@@ -34,6 +34,7 @@ newlineChar = process.env.NEWLINE_CHAR;
  */
 
 const database = require('./database.js');
+
 let commands = [];
 let counter = 0;
 
@@ -307,8 +308,8 @@ discordClient.on('ready', () => {
  * ===============================
  */
 
-// When a Discord message is received...
-discordClient.on('message', (message) => {
+// processMessage()
+function processMessage(message) {
   // Getting the message context variables
   const hasCommandToken = message.content.startsWith(commandToken);
   let masterCommand = (message.author.id === ownerID);
@@ -453,6 +454,34 @@ discordClient.on('message', (message) => {
   }
 
   // IF the bot was mentioned...
+}
+
+// When a Discord message is received...
+discordClient.on('message', (message) => {
+  // Getting the original command
+  const ogCommand = message.content;
+
+  // Try to process the message
+  try {
+    processMessage(message);
+  } catch (e) {
+    // CATCHING the error + sending a bug report to the bot owner
+    let str = `Oops, an error occured! The bot owner (${process.env.OWNER_NAME}) has been made aware of the issue.`
+              + 'Hopefully it will get fixed soon!';
+    sendReply(message, str);
+    const owner = discordClient.users.get(ownerID);
+    if (owner === undefined) {
+      str = '\nERROR: Bot Owner could not be found. Displaying error in console...\n';
+      str += `\nCommand: [${ogCommand}]\nStack Trace:\n${e.stack}\n`;
+      console.log(str);
+    } else {
+      str = ':rotating_light: **NEW ERROR** :rotating_light:\nCommand:\n';
+      str += `\`\`\`${ogCommand}\`\`\``;
+      str += 'Error:\n';
+      str += `\`\`\`${e.stack}\`\`\``;
+      owner.send(str);
+    }
+  }
 });
 
 // Logging into Discord
