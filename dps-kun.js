@@ -20,16 +20,18 @@ let postingEnabled = true;
 const newlineRegex = /\r?\n/;
 let newlineChar = '';
 
-//= ====================================================
-// Determining the Appropriate Newline Character by OS
-//= ====================================================
+/* ===============================================================
+ * ===== Determining the appropriate Newline Character by OS =====
+ * ===============================================================
+ */
 
 process.env.NEWLINE_CHAR = (process.platform === 'win32' ? '\r\n' : '\n');
 newlineChar = process.env.NEWLINE_CHAR;
 
-//= =========================
-// Registering the Commands
-//= =========================
+/* ====================================
+ * ===== REGISTERING THE COMMANDS =====
+ * ====================================
+ */
 
 const database = require('./database.js');
 let commands = [];
@@ -46,6 +48,7 @@ LoadDatabase();
 // UnloadDatabase()
 function UnloadDatabase() {
   console.log('=== UNLOADING SONGS DATABASE ===');
+  database.UnloadModules();
   delete require.cache[require.resolve('./database.js')];
   console.log('Done unloding songs database!\n');
 }
@@ -83,9 +86,10 @@ function UnloadCustomCommands() {
   console.log('Done unloading custom commands!\n');
 }
 
-//= ======================
-// Permissions Functions
-//= ======================
+/* ================================
+ * ===== PERMISSION FUNCTIONS =====
+ * ================================
+ */
 
 let botMasters = [];
 let blacklist = [];
@@ -131,9 +135,10 @@ function writeMemberFile(fileLoc, members) {
 // Calling loadPermissions() on startup
 loadPermissions();
 
-//= ============
-// Server Code
-//= ============
+/* =======================
+ * ===== SERVER CODE =====
+ * =======================
+ */
 
 // Using the API to send a reply
 function sendReply(apiObject, reply) {
@@ -297,6 +302,11 @@ discordClient.on('ready', () => {
   console.log('DPS-kun is Ready!\n');
 });
 
+/* ===============================
+ * ===== PROCESSING MESSAGES =====
+ * ===============================
+ */
+
 // When a Discord message is received...
 discordClient.on('message', (message) => {
   // Getting the message context variables
@@ -349,23 +359,23 @@ discordClient.on('message', (message) => {
         }
       }
 
-      // ::::::::::::::::::
+      // ::::::::::::::::
       // SPECIAL COMMANDS
-      // ::::::::::::::::::
+      // ::::::::::::::::
 
-      // help
+      // === HELP ===
       if (!found && cmd === 'help') {
         HelpCommand(message);
         found = true;
       }
 
-      // bothelp
+      // === BOTHELP ===
       if (!found && cmd === 'bothelp' && masterCommand) {
         BotHelpCommand(message);
         found = true;
       }
 
-      // == PROMOTE ==
+      // === PROMOTE ===
       if (!found && cmd.startsWith('promote')) {
         if (masterCommand && !commandInDM) {
           if (firstSpace < 1) { sendReply(message, 'Proper Usage: `!promote [server role]`'); } else {
@@ -376,7 +386,7 @@ discordClient.on('message', (message) => {
         found = true;
       }
 
-      // == DEMOTE ==
+      // === DEMOTE ===
       if (!found && cmd.startsWith('demote')) {
         if (masterCommand && !commandInDM) {
           if (firstSpace < 1) { sendReply(message, 'Proper Usage: `!demote [server role]`'); } else {
@@ -387,7 +397,7 @@ discordClient.on('message', (message) => {
         found = true;
       }
 
-      // == BLACKLIST ==
+      // === BLACKLIST ===
       if (!found && cmd.startsWith('blacklist')) {
         if (masterCommand && !commandInDM) {
           if (firstSpace < 1 || cmd.endsWith('help')) {

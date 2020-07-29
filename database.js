@@ -1,14 +1,15 @@
 // Modules
 const fs = require('fs');
 
-// TEST TEST TEST
-const gcpcModule = require('./database-modules/groove-coaster-pc.js');
-const msdsModule = require('./database-modules/muse-dash.js');
-const prime2Module = require('./database-modules/piu-prime-2.js');
-// TEST TEST TEST
-
 // Constant Variables
-const newlineChar = process.env.NEWLINE_CHAR;
+const modulesLocation = './database-modules';
+const moduleExports = [
+  'ModuleName',
+  'Load',
+  'Songs',
+  'Search',
+  'Help',
+];
 
 /* =================================
  * ===== SEARCH HELP FUNCTIONS =====
@@ -67,23 +68,41 @@ function songIntCompare(song, property, exact, matchNum, range) {
  * ===== GENERIC FUNCTIONS =====
  * =============================
  */
-// loadSongs()
+
+// loadModules()
 function loadModules() {
-  // Loading the song CSVs
-  gcpcModule.Load();
-  msdsModule.Load();
-  prime2Module.Load();
+  fs.readdirSync(modulesLocation).forEach((file) => {
+    if (file.endsWith('.js')) {
+      const databaseMod = require(`${modulesLocation}/${file}`);
+      let passedCheck = true;
+      for (let num = 0; num < moduleExports.length; num++) {
+        if (databaseMod[moduleExports[num]] === undefined) {
+          console.log(`\nERROR: The '${moduleExports[num]}' export of [${file}] is undefined!`);
+          passedCheck = false;
+        }
+      }
+      if (passedCheck) {
+        module.exports[databaseMod.ModuleName] = databaseMod;
+        databaseMod.Load();
+      }
+    }
+  });
 }
 
-// Setting up the exports
+// unloadModules()
+function unloadModules() {
+  fs.readdirSync(modulesLocation).forEach((file) => {
+    if (file.endsWith('.js')) {
+      const databaseMod = require.resolve(`${modulesLocation}/${file}`);
+      delete require.cache[databaseMod];
+    }
+  });
+}
+
+// Setting up the generic exports
 module.exports = {
   LoadModules: loadModules,
+  UnloadModules: unloadModules,
   SongStringCompare: songStringCompare,
   SongIntCompare: songIntCompare,
 };
-
-// TEST TEST TEST
-module.exports[gcpcModule.ModuleName] = gcpcModule;
-module.exports[msdsModule.ModuleName] = msdsModule;
-module.exports[prime2Module.ModuleName] = prime2Module;
-// TEST TEST TEST
