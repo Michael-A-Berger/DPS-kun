@@ -207,13 +207,13 @@ function grooveCoasterPcChallenge(message) {
 
   // Getting the help message if requested, otherwise searching the songs
   if (message.content.endsWith('help')) {
-    let helpWithGimmick = database.GrooveCoasterPCHelp();
-    helpWithGimmick = helpWithGimmick.substring(0, helpWithGimmick.length - 3);
-    helpWithGimmick = helpWithGimmick.replace('[extra]\n\n', '[extra] [gimmick]\n\n');
-    helpWithGimmick += '- [gimmick]   = Adds a gameplay modifier to the challenge\n```';
-    returnString = helpWithGimmick;
+    returnString = database.GrooveCoasterPC.Help();
+    returnString = returnString.replace('<dps_cmd>', 'challenge');
+    returnString = returnString.substring(0, returnString.length - 3);
+    returnString = returnString.replace('[extra]\n\n', '[extra] [gimmick]\n\n');
+    returnString += '- [gimmick]   = Adds a gameplay modifier to the challenge\n```';
   } else {
-    validSongs = database.SearchGrooveCoasterPC(message.content);
+    validSongs = database.GrooveCoasterPC.Search(message.content);
   }
 
   // IF the valid songs array is longer than one song, randomly choose a song
@@ -260,9 +260,10 @@ function museDashChallenge(message) {
 
   // Getting the help message if requested, otherwise searching the songs
   if (message.content.endsWith('help')) {
-    returnString = database.MuseDashHelp();
+    returnString = database.MuseDash.Help();
+    returnString = returnString.replace('<dps_cmd>', 'challenge');
   } else {
-    validSongs = database.SearchMuseDash(message.content);
+    validSongs = database.MuseDash.Search(message.content);
   }
 
   // IF the valid songs array is longer than one song, randomly choose a song
@@ -310,12 +311,13 @@ function piuPrime2Challenge(message) {
 
   // Getting the help message if requested, otherwise searching the songs
   if (message.content.endsWith('help')) {
-    returnString = database.PIUPrime2Help();
+    returnString = database.PIUPrime2.Help();
+    returnString = returnString.replace('<dps_cmd>', 'challenge');
     returnString = returnString.replace('\n\n', ' [gimmick]\n\n');
     returnString = returnString.substr(0, returnString.length - 3);
     returnString += '- [gimmick]       = Adds a gameplay modifier to the challenge (append \':#\' for multiple modifiers)\n```';
   } else {
-    validSongs = database.SearchPIUPrime2(message.content);
+    validSongs = database.PIUPrime2.Search(message.content);
   }
 
   // IF the valid songs array is longer than one song, randomly choose a song

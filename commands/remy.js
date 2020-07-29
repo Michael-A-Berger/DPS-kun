@@ -29,7 +29,7 @@ const defaultLinks = {
 let remyLinks;
 
 // Getting the appropriate newline character
-const newlineChar = '\r\n'; // i still dont know
+const newlineChar = process.env.NEWLINE_CHAR;
 
 // remy()
 function remy(message) {

@@ -9,6 +9,7 @@
     "pretest": "eslint ./ --fix",
     "lint-bot": "eslint ./dps-kun.js --fix",
     "lint-database": "eslint ./database.js --fix",
+    "lint-modules": "eslint ./database-modules --fix",
     "lint-commands": "eslint ./commands --fix",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

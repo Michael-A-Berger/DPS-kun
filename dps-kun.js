@@ -24,22 +24,21 @@ let newlineChar = '';
 // Determining the Appropriate Newline Character by OS
 //= ====================================================
 
-// idk, ask somebody else
-newlineChar = '\r\n';
+process.env.NEWLINE_CHAR = (process.platform === 'win32' ? '\r\n' : '\n');
+newlineChar = process.env.NEWLINE_CHAR;
 
 //= =========================
 // Registering the Commands
 //= =========================
 
-let database = {};
+const database = require('./database.js');
 let commands = [];
 let counter = 0;
 
 // LoadDatabase()
 function LoadDatabase() {
   console.log('=== LOADING SONGS DATABASE ===');
-  database = require('./database.js');
-  database.LoadSongs();
+  database.LoadModules();
   console.log('Done loading songs database!\n');
 }
 LoadDatabase();
