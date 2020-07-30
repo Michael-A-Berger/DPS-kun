@@ -8,20 +8,18 @@ If you are a web developer with a decent understanding of Node, you already know
 
 # Roadmap
 
-1. Get the bot ready for private deployment
-    - Setup
-2. Add more commands
+1. Add more commands
     - Song info (search database -> ask user for clarification -> display song properties)
     - Daily setlist (Create list of randomly-chosen songs and post it every X hours)
     - Auto-Twitter posting (looks for non-retweet posts from rhythm game dev accounts + posts them to specified channel)
     - More Challenge sub-commands (for actually relevant rhythm games)
-3. Get the bot ready for _public_ deployment
+2. Get the bot ready for _public_ deployment
     - Reworking "Bot Master" commands
     - Implement landing websites
     - Centralized hosting (most likely Heroku)
-4. Rework current features using Discord's **[Updated Bot API](https://blog.discord.com/the-future-of-bots-on-discord-4e6e050ab52e)**
+3. Rework current features using Discord's **[Updated Bot API](https://blog.discord.com/the-future-of-bots-on-discord-4e6e050ab52e)**
     - Update goes live October 7th, 2020
-5. Never. Stop. Developing.
+4. Never. Stop. Developing.
 
 # Deployment
 
