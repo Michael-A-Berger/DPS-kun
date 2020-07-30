@@ -17,7 +17,7 @@ const moduleExports = [
  */
 
 // songStringCompare()
-function songStringCompare(song, property, exact, matchPhrase) {
+function songStringCompare(song, property, exact, matchPhrase, equal = false) {
   // Defining the result variable to return
   let result = false;
 
@@ -25,8 +25,13 @@ function songStringCompare(song, property, exact, matchPhrase) {
   if (song !== undefined) {
     // IF we're looking for an exact match...
     if (exact) {
-      // Checking if the matching phrase exists in the string
-      result = (song[property].toLowerCase().indexOf(matchPhrase) > -1);
+      // IF an equal match is requested, check if the strings are equal (barring letter case)
+      if (equal) {
+        result = song[property].toLowerCase() === matchPhrase;
+      } else {
+        // ELSE check if the matching phrase exists in the string
+        result = (song[property].toLowerCase().indexOf(matchPhrase) > -1);
+      }
     } else {
       // ELSE just check if the property exists and is NOT undefined
       result = (song[property] !== undefined);

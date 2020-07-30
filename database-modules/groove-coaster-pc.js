@@ -1,5 +1,6 @@
 // Modules
 const fs = require('fs');
+
 const database = require(`${__dirname}/../database.js`);
 
 // Constant variables

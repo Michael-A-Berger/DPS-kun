@@ -3,20 +3,22 @@ const database = require(`${__dirname}/../database.js`);
 
 // Constant Variables
 const gcpcIdentities = ['groovecoasterpc', 'gcpc'];
-const museDashIdentities = ['musedash', 'msds'];
-const piuPrime2Identities = ['piuprime2', 'prime2'];
-const piuPrime2GimmickMax = 6;
 const iidxMobileIdentities = ['iidxmobile', 'iidxm'];
+const museDashIdentities = ['musedash', 'msds'];
+const prime2Identities = ['piuprime2', 'prime2'];
+const piuPrime2GimmickMax = 6;
 
 // supportedGames()
 function supportedGames() {
   const gcpcString = gcpcIdentities.toString().replace(',', ', ');
+  const iidxmString = iidxMobileIdentities.toString().replace(',', ', ');
   const msdsString = museDashIdentities.toString().replace(',', ', ');
-  const prime2String = piuPrime2Identities.toString().replace(',', ', ');
+  const prime2String = prime2Identities.toString().replace(',', ', ');
   const support = 'Supported Games:\n```'
-                  + `Groove Coaster PC:    [${gcpcString}]\n`
-                  + `Muse Dash:            [${msdsString}]\n`
-                  + `Pump It Up Prime 2:   [${prime2String}]\n`
+                  + `Groove Coaster PC:     [${gcpcString}]\n`
+                  + `IIDX Ultimate Mobile:  [${iidxmString}]\n`
+                  + `Muse Dash:             [${msdsString}]\n`
+                  + `Pump It Up Prime 2:    [${prime2String}]\n`
                   + '```';
   return support;
 }
@@ -243,8 +245,8 @@ function grooveCoasterPcChallenge(message) {
   // IF the return string has not been defined yet... (no matches found)
   if (returnString === undefined) {
     returnString = '\:open_file_folder: No songs could be found with those restrictions! '
-                  + 'Enter `challenge groovecoasterpc help` to see the list of valid challenge '
-                  + 'options for this game.';
+                  + `Enter \`challenge ${gcpcIdentities[0]} help\` to see the list of valid `
+                  + 'challenge options for this game.';
   }
 
   // Returning the return string
@@ -291,8 +293,8 @@ function museDashChallenge(message) {
   // IF the return string has not been defined yet... (no matches found)
   if (returnString === undefined) {
     returnString = '\:open_file_folder: No songs could be found with those restrictions! '
-                  + 'Enter `challenge musedash help` to see the list of valid challenge '
-                  + 'options for this game.';
+                  + `Enter \`challenge ${museDashIdentities[0]} help\` to see the list of `
+                  + 'valid challenge options for this game.';
   }
 
   // Returning the return string
@@ -429,8 +431,73 @@ function piuPrime2Challenge(message) {
   // IF the return string has not been defined yet... (no matches found)
   if (returnString === undefined) {
     returnString = '\:open_file_folder: No songs could be found with those restrictions! '
-                  + 'Enter `challenge piuprime2 help` to see the list of valid challenge '
-                  + 'options for this game.';
+                  + `Enter \`challenge ${prime2Identities[0]} help\` to see the list of `
+                  + 'valid challenge options for this game.';
+  }
+
+  // Returning the return string
+  return returnString;
+}
+
+// iidxMobileChallenge()
+function iidxMobileChallenge(message) {
+  // Defining the return string + the song + the valid songs
+  let returnString;
+  let chosenSong;
+  let validSongs = [];
+
+  // Getting the help message if requested, otherwise searching the songs
+  if (message.content.endsWith('help')) {
+    returnString = database.IIDXMobile.Help();
+    returnString = returnString.replace('<dps_cmd>', 'challenge');
+  } else {
+    validSongs = database.IIDXMobile.Search(message.content);
+  }
+
+  // IF the valid songs array is longer than one song, randomly choose a song
+  if (validSongs.length > 1) {
+    chosenSong = validSongs[Math.round(Math.random() * (validSongs.length - 1))];
+  } else if (validSongs.length === 1) { chosenSong = validSongs[0]; }
+
+  // IF a song was chosen, format the return string
+  if (chosenSong !== undefined) {
+    returnString = `\:cd:\:point_left: <@${message.author.id}> 's CHALLENGE \:point_right:\:cd:\nPlay`;
+
+    // Listing the difficulty
+    if (message.content.toLowerCase().indexOf(' another') > -1) {
+      returnString += ` the **Another (${chosenSong.spa})** chart of`;
+    } else if (message.content.toLowerCase().indexOf(' hyper') > -1) {
+      returnString += ` the **Hyper (${chosenSong.sph})** chart of`;
+    } else if (message.content.toLowerCase().indexOf(' normal') > -1) {
+      returnString += ` the **Normal (${chosenSong.spn})** chart of`;
+    } else if (message.content.toLowerCase().indexOf(' beginner') > -1) {
+      returnString += ` the **Beginner (${chosenSong.beginner})** chart of`;
+    }
+    returnString += ` **${chosenSong.name}** (by ${chosenSong.artist})`;
+
+    // Listing other parameters (if requested)
+    if (message.content.toLowerCase().indexOf(' genre') > -1) {
+      returnString += ` (Genre: ${chosenSong.genre})`;
+    }
+    if (message.content.toLowerCase().indexOf(' bpm') > -1) {
+      returnString += ` (BPM: ${chosenSong.bpm})`;
+    }
+    if (message.content.toLowerCase().indexOf(' origin') > -1) {
+      returnString += ` (Origin: ${chosenSong.origin})`;
+    }
+    if (message.content.toLowerCase().indexOf(' price') > -1) {
+      returnString += ` (Price: ${chosenSong.price})`;
+    }
+
+    // Adding the song style
+    returnString += `\n(Style: ${chosenSong.style})`;
+  }
+
+  // IF the return string has not been defined yet... (no matches found)
+  if (returnString === undefined) {
+    returnString = '\:open_file_folder: No songs could be found with those restrictions! '
+                  + `Enter \`challenge ${iidxMobileIdentities[0]} help\` to see the list of `
+                  + 'valid challenge options for this game.';
   }
 
   // Returning the return string
@@ -450,6 +517,14 @@ function challenge(message) {
     }
   }
 
+  // IIDX Ultimate Mobile
+  for (let num = 0; !found && num < iidxMobileIdentities.length; num++) {
+    if (message.content.startsWith(iidxMobileIdentities[num])) {
+      stringToPrint = iidxMobileChallenge(message);
+      found = true;
+    }
+  }
+
   // Muse Dash
   for (let num = 0; !found && num < museDashIdentities.length; num++) {
     if (message.content.startsWith(museDashIdentities[num])) {
@@ -459,8 +534,8 @@ function challenge(message) {
   }
 
   // PIU Prime 2
-  for (let num = 0; !found && num < piuPrime2Identities.length; num++) {
-    if (message.content.startsWith(piuPrime2Identities[num])) {
+  for (let num = 0; !found && num < prime2Identities.length; num++) {
+    if (message.content.startsWith(prime2Identities[num])) {
       stringToPrint = piuPrime2Challenge(message);
       found = true;
     }
