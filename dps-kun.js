@@ -4,7 +4,7 @@ const Discord = require('discord.js');
 
 // JSON files
 const discordAuth = {
-  api_key: process.env.DISCORD_API_KEY,
+  api_key: process.env.DISCORD_API_TOKEN,
   api_secret: process.env.DISCORD_API_SECRET,
 };
 
@@ -15,7 +15,7 @@ const blacklistFile = './blacklist.txt';
 const botMasterFile = './bot_masters.txt';
 const permissionsLog = './permissions_log.txt';
 const commandsLocation = './commands';
-const commandToken = '!';
+const commandChar = process.env.COMMAND_CHAR;
 let postingEnabled = true;
 const newlineRegex = /\r?\n/;
 let newlineChar = '';
@@ -166,7 +166,7 @@ function HelpCommand(message) {
   for (counter = 0; counter < commands.length; counter++) {
     if (commands[counter].secret) { secretCount++; } else {
       for (let num = 0; num < commands[counter].keywords.length; num++) {
-        stringToPrint += `${commandToken + commands[counter].keywords[num]}\n`;
+        stringToPrint += `${commandChar + commands[counter].keywords[num]}\n`;
       }
       stringToPrint += `- ${commands[counter].description}\n\n`;
     }
@@ -177,18 +177,18 @@ function HelpCommand(message) {
 
 // BotHelpCommand()
 function BotHelpCommand(message) {
-  const stringToPrint = `\`\`\`${commandToken}promote\n`
+  const stringToPrint = `\`\`\`${commandChar}promote\n`
                         + `- Allows members with the provided role to issue bot master commands\n\n${
-                          commandToken}demote\n`
+                          commandChar}demote\n`
                         + `- Removes the ability for members with the provided role to issue bot master commands\n\n${
-                          commandToken}blacklist\n`
+                          commandChar}blacklist\n`
                         + '- Modifies the bot command blacklist. Members on the blacklist cannot issue any bot commands. (Note: '
                         + 'Members with bot master roles can be put on the blacklist. The only member immune from being put '
                         + `on the blacklist is this bot's owner, ${process.env.OWNER_NAME}.)\n\n${
-                          commandToken}stop\n`
+                          commandChar}stop\n`
                         + '- All bot commands are disabled until a member with bot master permissions issues the [!start] '
                         + `command\n\n${
-                          commandToken}start\n`
+                          commandChar}start\n`
                         + '- Enables all bot commands after [!stop] is issued```';
 
   sendReply(message, stringToPrint);
@@ -209,7 +209,7 @@ function PromoteRole(message, cmd) {
         });
 
       sendReply(message, `\:passport_control: Members with the ${roleToPromote} role now have bot master permissions!`
-                        + ` Type \`${commandToken}bothelp\` to see all bot master commands.`);
+                        + ` Type \`${commandChar}bothelp\` to see all bot master commands.`);
     } else {
       sendReply(message, `\:warning: Members with the ${roleToPromote} role already have bot master permissions! `
                         + '(There\'s no need to promote them any further.)');
@@ -239,7 +239,7 @@ function DemoteRole(message, cmd) {
                         + 'have been revoked!');
     } else {
       sendReply(message, `\:warning: Users with the ${roleToDemote} role don't have bot master permissions! If `
-                        + `you wish to disable a member from using bot commands altogether, use the \`${commandToken
+                        + `you wish to disable a member from using bot commands altogether, use the \`${commandChar
                         }blacklist\` command.`);
     }
   } else {
@@ -311,7 +311,7 @@ discordClient.on('ready', () => {
 // processMessage()
 function processMessage(message) {
   // Getting the message context variables
-  const hasCommandToken = message.content.startsWith(commandToken);
+  const hasCommandToken = message.content.startsWith(commandChar);
   let masterCommand = (message.author.id === ownerID);
   const commandInDM = (message.channel.type === 'dm' || message.channel.type === 'group');
   let userOnBlacklist = false;
@@ -402,8 +402,8 @@ function processMessage(message) {
       if (!found && cmd.startsWith('blacklist')) {
         if (masterCommand && !commandInDM) {
           if (firstSpace < 1 || cmd.endsWith('help')) {
-            sendReply(message, `Proper Usage:\n\`\`\`${commandToken}blacklist @[username]\n- Adds a user to the `
-                              + `bot blacklist (they will be unable to issue bot commands)\n\n${commandToken}`
+            sendReply(message, `Proper Usage:\n\`\`\`${commandChar}blacklist @[username]\n- Adds a user to the `
+                              + `bot blacklist (they will be unable to issue bot commands)\n\n${commandChar}`
                               + 'blacklist remove @[username]\n- Removes a user from the bot blacklist```');
           } else {
             Blacklist(message, cmd);
@@ -418,7 +418,7 @@ function processMessage(message) {
     if (cmd === 'stop' && masterCommand && postingEnabled && !userOnBlacklist) {
       postingEnabled = false;
       sendReply(message, `${'\:rotating_light: All bot commands have been disabled! \:rotating_light:\n'
-                                + 'A user with bot master permissions must type `'}${commandToken}start\` to enable`
+                                + 'A user with bot master permissions must type `'}${commandChar}start\` to enable`
                                 + 'bot commands\nplease don\'t keep me offline for long senpai \:sob:');
     }
 
