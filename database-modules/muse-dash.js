@@ -19,11 +19,34 @@ const newlineChar = process.env.NEWLINE_CHAR;
 function loadSongs() {
   let fileString = fs.readFileSync(songFile, 'utf8');
   let songString = [];
+  let counter = 0;
+  let nextCommaPos = -1;
 
   fileString = fileString.split(newlineChar);
   for (let num = 1; num < fileString.length; num++) {
     if (fileString[num].includes(',')) {
-      songString = fileString[num].split(',');
+      // Reading the song info string from the CSV
+      songString = [];
+      counter = 0;
+      while (fileString[num].length > 0) {
+        if (fileString[num].startsWith('"')) {
+          nextCommaPos = fileString[num].indexOf('",');
+          songString[counter] = fileString[num].substr(1, nextCommaPos - 1);
+          fileString[num] = fileString[num].substr(nextCommaPos + 2);
+        } else {
+          nextCommaPos = fileString[num].indexOf(',');
+          if (nextCommaPos > -1) {
+            songString[counter] = fileString[num].substr(0, nextCommaPos);
+            fileString[num] = fileString[num].substr(nextCommaPos + 1);
+          } else {
+            songString[counter] = fileString[num];
+            fileString[num] = 0;
+          }
+        }
+        counter++;
+      }
+      
+      // Creating the song object
       msdsSongs[num - 1] = {
         name: songString[0],
         artist: songString[1],
@@ -68,7 +91,7 @@ function format(song) {
     songStr += `\n- Unlock Level: **${song.unlockLevel}**`;
   }
   if (song.cover.length > 0) {
-    songStr += `\n- Song Jacket:\n${song.cover}`;
+    songStr += `\n- Song Jacket: ${song.cover}`;
   }
 
   // Returning the formatted song string
