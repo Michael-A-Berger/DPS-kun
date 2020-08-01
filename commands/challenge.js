@@ -195,7 +195,7 @@ function grooveCoasterPcChallenge(message) {
   // Getting the help message if requested, otherwise searching the songs
   if (message.content.endsWith('help')) {
     returnString = database.GrooveCoasterPC.Help();
-    returnString = returnString.replace('<dps_cmd>', 'challenge');
+    returnString = returnString.replace(/<dps_cmd>/g, 'challenge');
     returnString = returnString.substring(0, returnString.length - 3);
     returnString = returnString.replace('[extra]\n\n', '[extra] [gimmick]\n\n');
     returnString += '- [gimmick]   = Adds a gameplay modifier to the challenge\n```';
@@ -248,7 +248,7 @@ function museDashChallenge(message) {
   // Getting the help message if requested, otherwise searching the songs
   if (message.content.endsWith('help')) {
     returnString = database.MuseDash.Help();
-    returnString = returnString.replace('<dps_cmd>', 'challenge');
+    returnString = returnString.replace(/<dps_cmd>/g, 'challenge');
   } else {
     validSongs = database.MuseDash.Search(message.content);
   }
@@ -299,7 +299,10 @@ function piuPrime2Challenge(message) {
   // Getting the help message if requested, otherwise searching the songs
   if (message.content.endsWith('help')) {
     returnString = database.PIUPrime2.Help();
-    returnString = returnString.replace('<dps_cmd>', 'challenge');
+    returnString = returnString.replace(/<dps_cmd>/g, 'challenge');
+  } else if (message.content.endsWith('help2')) {
+    returnString = database.PIUPrime2.Help2();
+    returnString = returnString.replace(/<dps_cmd>/g, 'challenge');
     returnString = returnString.replace('\n\n', ' [gimmick]\n\n');
     returnString = returnString.substr(0, returnString.length - 3);
     returnString += '- [gimmick]       = Adds a gameplay modifier to the challenge (append \':#\' for multiple modifiers)\n```';
@@ -434,7 +437,10 @@ function iidxMobileChallenge(message) {
   // Getting the help message if requested, otherwise searching the songs
   if (message.content.endsWith('help')) {
     returnString = database.IIDXMobile.Help();
-    returnString = returnString.replace('<dps_cmd>', 'challenge');
+    returnString = returnString.replace(/<dps_cmd>/g, 'challenge');
+  } else if (message.content.endsWith('help2')) {
+    returnString = database.IIDXMobile.Help2();
+    returnString = returnString.replace(/<dps_cmd>/g, 'challenge');
   } else {
     validSongs = database.IIDXMobile.Search(message.content);
   }

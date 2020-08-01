@@ -5,6 +5,7 @@ const database = require(`${__dirname}/../database.js`);
 
 // Constant variables
 const songFile = `${__dirname}/../database/iidx-ultimate-mobile.csv`;
+const identities = ['iidxmobile', 'iidxm'];
 const iidxmSongs = [];
 
 // Newline Variable
@@ -324,8 +325,23 @@ function search(paramString) {
 
 // help()
 function help() {
-  const str = 'Proper Usage:\n```<dps_cmd> iidxmobile [name:?] [artist:?] [genre:?] [bpm:?] [beginner] [normal] '
-              + '[hyper] [another] [style:?] [origin:?] [price:?] [allsongs/removed]\n\n'
+  const str = `Proper Usage:\n\`\`\`<dps_cmd> ${identities[0]} [name:?] [artist:?] [beginner] [normal] `
+              + '[hyper] [another] [style:?] [price:?]\n\n'
+              + '- [name:?]    = Song name contains \'?\' (no spaces)\n'
+              + '- [artist:?]  = Song artist name contains \'?\' (no spaces)\n'
+              + '- [beginner]  = Song must have a Beginner difficulty chart (append \':#\' for exact difficulty, \':~#\' for range)\n'
+              + '- [normal]    = Song must have a Normal difficulty chart (append \':#\' for exact difficulty, \':~#\' for range)\n'
+              + '- [hyper]     = Song must have a Hyper difficulty chart (append \':#\' for exact difficulty, \':~#\' for range)\n'
+              + '- [another]   = Song must have an Another difficulty chart (append \':#\' for exact difficulty, \':~#\' for range)\n'
+              + '- [style:?]   = \'?\' is the style the song is sorted under in-game (Options: 1 -> 27, mobile)\n'
+              + '- [price:?]   = Whether the song costs money to play (Options: free, subscription)\n'
+              + `\`\`\`(Issue \` <dps_cmd> ${identities[0]} help2 \` for all options)`;
+  return str;
+}
+
+function help2() {
+  const str = `Proper Usage:\n\`\`\`<dps_cmd> ${identities[0]} [name:?] [artist:?] [genre:?] [bpm:?] `
+              + '[beginner] [normal] [hyper] [another] [style:?] [origin:?] [price:?] [allsongs/removed]\n\n'
               + '- [name:?]    = Song name contains \'?\' (no spaces)\n'
               + '- [artist:?]  = Song artist name contains \'?\' (no spaces)\n'
               + '- [genre:?]   = Song genre name contains \'?\' (no spaces)\n'
@@ -347,10 +363,11 @@ function help() {
 module.exports = {
   ModuleName: 'IIDXMobile',
   FullGameName: 'IIDX Ultimate Mobile',
-  CommandIdentities: ['iidxmobile', 'iidxm'],
+  CommandIdentities: identities,
   Load: loadSongs,
   Songs: iidxmSongs,
   Format: format,
   Search: search,
   Help: help,
+  Help2: help2,
 };

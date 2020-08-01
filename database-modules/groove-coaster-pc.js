@@ -5,6 +5,7 @@ const database = require(`${__dirname}/../database.js`);
 
 // Constant variables
 const songFile = `${__dirname}/../database/groove-coaster-pc.csv`;
+const identities = ['groovecoasterpc', 'gcpc'];
 const gcpcSongs = [];
 
 // Newline Variable
@@ -229,7 +230,7 @@ function search(paramString) {
 
 // help()
 function help() {
-  const str = 'Proper Usage:\n```<dps_cmd> groovecoasterpc [name:?] [artist:?] [bpm:?] [simple] '
+  const str = `Proper Usage:\n\`\`\`<dps_cmd> ${identities[0]} [name:?] [artist:?] [bpm:?] [simple] `
               + '[normal] [hard] [extra]\n\n'
               + '- [name:?]    = Song name contains \'?\' (no spaces)\n'
               + '- [artist:?]  = Song artist name contains \'?\' (no spaces)\n'
@@ -246,10 +247,11 @@ function help() {
 module.exports = {
   ModuleName: 'GrooveCoasterPC',
   FullGameName: 'Groove Coaster PC',
-  CommandIdentities: ['groovecoasterpc', 'gcpc'],
+  CommandIdentities: identities,
   Load: loadSongs,
   Songs: gcpcSongs,
   Format: format,
   Search: search,
   Help: help,
+  Help2: help,
 };

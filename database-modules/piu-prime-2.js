@@ -5,6 +5,7 @@ const database = require(`${__dirname}/../database.js`);
 
 // Constant variables
 const songFile = `${__dirname}/../database/piu-prime-2.csv`;
+const identities = ['piuprime2', 'prime2'];
 const prime2Songs = [];
 
 // Newline Variable
@@ -370,7 +371,22 @@ function search(paramString) {
 
 // help()
 function help() {
-  const str = 'Proper Usage:\n```<dps_cmd> piuprime2 [name:?] [artist:?] [bpm:?] [type:?] '
+  const str = `Proper Usage:\n\`\`\`<dps_cmd> ${identities[0]} [name:?] [artist:?] [type:?] `
+              + '[single] [double] [series:?] [channel:?]\n\n'
+              + '- [name:?]        = Song name contains \'?\' (no spaces)\n'
+              + '- [artist:?]      = Song artist name contains \'?\' (no spaces)\n'
+              + '- [type:?]        = \'?\' is the song\' type (Options: normal, remix, full, short)\n'
+              + '- [single]        = Song must have a Single chart (append \':#\' for exact difficulty, \':~#\' for range)\n'
+              + '- [double]        = Song must have a Double chart (append \':#\' for exact difficulty, \':~#\' for range)\n'
+              + '- [series:?]      = \'?\' is the in-game subseries label the song has been given (ex; nx, fiesta, prime, etc.)\n'
+              + '- [channel:?]     = \'?\' is the in-game channel the song resides in (ex; original, world, xross, etc.)\n'
+              + `\`\`\`(Issue \` <dps_cmd> ${identities[0]} help2 \` for all options)`;
+  return str;
+}
+
+// help2()
+function help2() {
+  const str = `Proper Usage:\n\`\`\`<dps_cmd> ${identities[0]} [name:?] [artist:?] [bpm:?] [type:?] `
               + '[version:?] [single] [double] [sperformance] [dperformance] [coop] [series:?] '
               + '[channel:?] [exclusive:?]\n\n'
               + '- [name:?]        = Song name contains \'?\' (no spaces)\n'
@@ -394,10 +410,11 @@ function help() {
 module.exports = {
   ModuleName: 'PIUPrime2',
   FullGameName: 'Pump It Up Prime 2',
-  CommandIdentities: ['piuprime2', 'prime2'],
+  CommandIdentities: identities,
   Load: loadSongs,
   Songs: prime2Songs,
   Format: format,
   Search: search,
   Help: help,
+  Help2: help2,
 };

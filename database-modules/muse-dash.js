@@ -45,7 +45,7 @@ function loadSongs() {
         }
         counter++;
       }
-      
+
       // Creating the song object
       msdsSongs[num - 1] = {
         name: songString[0],
@@ -301,4 +301,5 @@ module.exports = {
   Format: format,
   Search: search,
   Help: help,
+  Help2: help,
 };

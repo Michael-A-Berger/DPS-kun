@@ -12,6 +12,7 @@ const moduleExports = [
   'Format',
   'Search',
   'Help',
+  'Help2',
 ];
 let loadedModules = [];
 let identityDictionary = [];

@@ -141,9 +141,14 @@ function search(message) {
     // ELSE IF the module was not found, show the help message
     message.channel.send(help());
   } else if (message.content.endsWith(' help')) {
-    // ELSE IF the user just wants database search help
+    // ELSE IF the user just wants database search help (basic)
     let gameHelp = databaseMods[chosenMod].Help();
-    gameHelp = gameHelp.replace('<dps_cmd>', 'search');
+    gameHelp = gameHelp.replace(/<dps_cmd>/g, 'search');
+    message.channel.send(gameHelp);
+  } else if (message.content.endsWith(' help2')) {
+    // ELSE IF the user just wants database search help (advanced)
+    let gameHelp = databaseMods[chosenMod].Help2();
+    gameHelp = gameHelp.replace(/<dps_cmd>/g, 'search');
     message.channel.send(gameHelp);
   } else {
     // ELSE just search the database
