@@ -5,11 +5,16 @@ const fs = require('fs');
 const modulesLocation = './database-modules';
 const moduleExports = [
   'ModuleName',
+  'FullGameName',
+  'CommandIdentities',
   'Load',
   'Songs',
+  'Format',
   'Search',
   'Help',
 ];
+let loadedModules = [];
+let identityDictionary = [];
 
 /* =================================
  * ===== SEARCH HELP FUNCTIONS =====
@@ -88,6 +93,10 @@ function loadModules() {
       }
       if (passedCheck) {
         module.exports[databaseMod.ModuleName] = databaseMod;
+        loadedModules[databaseMod.ModuleName] = databaseMod;
+        databaseMod.CommandIdentities.forEach((identity) => {
+          identityDictionary[identity] = databaseMod.ModuleName;
+        });
         databaseMod.Load();
       }
     }
@@ -99,15 +108,45 @@ function unloadModules() {
   fs.readdirSync(modulesLocation).forEach((file) => {
     if (file.endsWith('.js')) {
       const databaseMod = require.resolve(`${modulesLocation}/${file}`);
+      loadedModules = loadedModules.splice(0, 1);
       delete require.cache[databaseMod];
     }
   });
+  identityDictionary = [];
+}
+
+// identityToModName()
+function identityToModName(id) {
+  return identityDictionary[id];
+}
+
+// supportedGames()
+function supportedGames() {
+  let support = 'Supported Games:\n```';
+  const modNames = Object.keys(loadedModules);
+  let longestName = -1;
+  modNames.forEach((name) => {
+    if (longestName < loadedModules[name].FullGameName.length) {
+      longestName = loadedModules[name].FullGameName.length;
+    }
+  });
+  modNames.forEach((name) => {
+    let newStr = loadedModules[name].FullGameName;
+    while (newStr.length < longestName + 2) newStr += '\xa0';
+    newStr += `[${loadedModules[name].CommandIdentities.toString().replace(/,/g, ', ')}]\n`;
+    support += newStr;
+  });
+  support += '```';
+  return support;
 }
 
 // Setting up the generic exports
 module.exports = {
   LoadModules: loadModules,
   UnloadModules: unloadModules,
+  IdentityToModuleName: identityToModName,
+  SupportedGames: supportedGames,
+  Modules: loadedModules,
   SongStringCompare: songStringCompare,
   SongIntCompare: songIntCompare,
 };

@@ -41,6 +41,32 @@ function loadSongs() {
   console.log(`-- Groove Coaster PC songs loaded! (Total: ${gcpcSongs.length})`);
 }
 
+// format()
+function format(song) {
+  // Formatting the song string
+  let songStr = `\:headphones:\:desktop:\t**${song.name}**\t\:desktop:\:headphones:`;
+  songStr += `\n- Composed by **${song.artist}**`;
+  songStr += `\n- BPM: **${song.bpm}**`;
+  songStr += '\n- Charts:';
+  if (!Number.isNaN(song.simple)) {
+    songStr += `\n\t\t**Simple (${song.simple})**`;
+  }
+  if (!Number.isNaN(song.normal)) {
+    songStr += `\n\t\t**Normal (${song.normal})**`;
+  }
+  if (!Number.isNaN(song.hard)) {
+    songStr += `\n\t\t**Hard (${song.hard})**`;
+  }
+  if (!Number.isNaN(song.extra)) {
+    songStr += `\n\t\t**Extra (${song.extra})**`;
+  }
+  songStr += `\n- Type: **${song.type}**`;
+  songStr += `\n- Added on **${song.date}**`;
+
+  // Returning the formatted song string
+  return songStr;
+}
+
 // search()
 function search(paramString) {
   // Defining the returning array
@@ -219,8 +245,11 @@ function help() {
 // Setting up the exports
 module.exports = {
   ModuleName: 'GrooveCoasterPC',
+  FullGameName: 'Groove Coaster PC',
+  CommandIdentities: ['groovecoasterpc', 'gcpc'],
   Load: loadSongs,
   Songs: gcpcSongs,
+  Format: format,
   Search: search,
   Help: help,
 };

@@ -64,6 +64,44 @@ function loadSongs() {
   console.log(`-- Pump It Up Prime 2 songs loaded! (Total: ${prime2Songs.length})`);
 }
 
+// format()
+function format(song) {
+  // Formatting the song
+  let songStr = `\:dancer:\t**${song.name} (${song.type})**\t\:dancer:`;
+  songStr += `\n- Composed by **${song.artist}**`;
+  songStr += `\n- BPM: **${song.bpm}**`;
+  songStr += '\n- Charts:';
+  let mapped = [];
+  if (!Number.isNaN(song.single[0])) {
+    mapped = song.single.map((diff) => `**S${diff}**`);
+    songStr += `\n\t\t${mapped.toString().replace(/,/g, ', ')}`;
+  }
+  if (!Number.isNaN(song.double[0])) {
+    mapped = song.double.map((diff) => `**D${diff}**`);
+    songStr += `\n\t\t${mapped.toString().replace(/,/g, ', ')}`;
+  }
+  if (!Number.isNaN(song.sPerformance[0])) {
+    mapped = song.sPerformance.map((diff) => `**SP${diff}**`);
+    songStr += `\n\t\t${mapped.toString().replace(/,/g, ', ')}`;
+  }
+  if (!Number.isNaN(song.dPerformance[0])) {
+    mapped = song.dPerformance.map((diff) => `**DP${diff}**`);
+    songStr += `\n\t\t${mapped.toString().replace(/,/g, ', ')}`;
+  }
+  if (!Number.isNaN(song.coop[0])) {
+    songStr += `\n\t\t**Co-op x${song.coop[0]}**`;
+  }
+  songStr += `\n- Channel: **${song.channel}**`;
+  songStr += `\n- Series: **${song.series}**`;
+  songStr += `\n- Available since **v${song.version}**`;
+  if (song.exclusivity.length > 0) {
+    songStr += `\n(Only playable in **${song.exclusivity}** regions.)`;
+  }
+
+  // Returning the formatted song string
+  return songStr;
+}
+
 // search()
 function search(paramString) {
   // Defining the returning array
@@ -333,8 +371,8 @@ function search(paramString) {
 // help()
 function help() {
   const str = 'Proper Usage:\n```<dps_cmd> piuprime2 [name:?] [artist:?] [bpm:?] [type:?] '
-              + '- [version:?] [single] [double] [sperformance] [dperformance] [coop] [series:?] '
-              + '- [channel:?] [exclusive:?]\n\n'
+              + '[version:?] [single] [double] [sperformance] [dperformance] [coop] [series:?] '
+              + '[channel:?] [exclusive:?]\n\n'
               + '- [name:?]        = Song name contains \'?\' (no spaces)\n'
               + '- [artist:?]      = Song artist name contains \'?\' (no spaces)\n'
               + '- [bpm:#]         = Song\'s BPM exactly matches \'#\' (prepend \'~\' for range of -/+ 10 BPM)\n'
@@ -355,8 +393,11 @@ function help() {
 // Setting up the exports
 module.exports = {
   ModuleName: 'PIUPrime2',
+  FullGameName: 'Pump It Up Prime 2',
+  CommandIdentities: ['piuprime2', 'prime2'],
   Load: loadSongs,
   Songs: prime2Songs,
+  Format: format,
   Search: search,
   Help: help,
 };

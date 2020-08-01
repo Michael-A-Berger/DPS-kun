@@ -8,21 +8,6 @@ const museDashIdentities = ['musedash', 'msds'];
 const prime2Identities = ['piuprime2', 'prime2'];
 const piuPrime2GimmickMax = 6;
 
-// supportedGames()
-function supportedGames() {
-  const gcpcString = gcpcIdentities.toString().replace(',', ', ');
-  const iidxmString = iidxMobileIdentities.toString().replace(',', ', ');
-  const msdsString = museDashIdentities.toString().replace(',', ', ');
-  const prime2String = prime2Identities.toString().replace(',', ', ');
-  const support = 'Supported Games:\n```'
-                  + `Groove Coaster PC:     [${gcpcString}]\n`
-                  + `IIDX Ultimate Mobile:  [${iidxmString}]\n`
-                  + `Muse Dash:             [${msdsString}]\n`
-                  + `Pump It Up Prime 2:    [${prime2String}]\n`
-                  + '```';
-  return support;
-}
-
 /* ====================================
  * ===== CHALLENGE HELPER METHODS =====
  * ====================================
@@ -543,14 +528,14 @@ function challenge(message) {
 
   // List of Supported Games
   if (message.content === 'support') {
-    stringToPrint = supportedGames();
+    stringToPrint = database.SupportedGames();
     found = true;
   }
 
   if (!found) {
     stringToPrint = 'Proper Usage:\n```challenge [game] [criteria?]\n\n'
-                    + "[game]       = The game to choose the chart from ('support' lists all supported games)\n"
-                    + "[criteria?]  = Restricts chosen song to certain criteria (issue 'challenge [game] "
+                    + "- [game]       = The game to choose the chart from ('support' lists all supported games)\n"
+                    + "- [criteria?]  = Restricts chosen song to certain criteria (issue 'challenge [game] "
                     + "help' to see options)```";
   }
 

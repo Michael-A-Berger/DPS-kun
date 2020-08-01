@@ -43,6 +43,38 @@ function loadSongs() {
   console.log(`-- Muse Dash songs loaded! (Total: ${msdsSongs.length})`);
 }
 
+// format()
+function format(song) {
+  // Formatting the song
+  let songStr = `\:guitar:\:bear:\:violin:\t**${song.name}**\t\:violin:\:bear:\:guitar:`;
+  songStr += `\n- Composed by **${song.artist}**`;
+  songStr += `\n- Length: **${song.length}**`;
+  songStr += `\n- BPM: **${song.bpm}**`;
+  songStr += '\n- Chart:';
+  if (!Number.isNaN(song.easy)) {
+    songStr += `\n\t\t**Easy (${song.easy})**`;
+  }
+  if (!Number.isNaN(song.hard)) {
+    songStr += `\n\t\t**Hard (${song.hard})**`;
+  }
+  if (!Number.isNaN(song.master)) {
+    songStr += `\n\t\t**Master (${song.master})**`;
+  }
+  if (!Number.isNaN(song.hidden)) {
+    songStr += `\n\t\t**Hidden (${song.hidden})**`;
+  }
+  songStr += `\n- Song Pack: **${song.pack}**`;
+  if (!Number.isNaN(song.unlockLevel)) {
+    songStr += `\n- Unlock Level: **${song.unlockLevel}**`;
+  }
+  if (song.cover.length > 0) {
+    songStr += `\n- Song Jacket:\n${song.cover}`;
+  }
+
+  // Returning the formatted song string
+  return songStr;
+}
+
 // search()
 function search(paramString) {
   // Defining the returning array
@@ -239,8 +271,11 @@ function help() {
 // Setting up the exports
 module.exports = {
   ModuleName: 'MuseDash',
+  FullGameName: 'Muse Dash',
+  CommandIdentities: ['musedash', 'msds'],
   Load: loadSongs,
   Songs: msdsSongs,
+  Format: format,
   Search: search,
   Help: help,
 };

@@ -45,6 +45,35 @@ function loadSongs() {
   console.log(`-- IIDX Ultimate Mobile songs loaded! (Total: ${iidxmSongs.length})`);
 }
 
+// format()
+function format(song) {
+  // Formatting the song
+  let songStr = `\:cd:\:point_left:\t**${song.name}**\t\:point_right:\:cd:`;
+  songStr += `\n- Composed by **${song.artist}**`;
+  songStr += `\n- Genre: **${song.genre}**`;
+  songStr += `\n- BPM: **${song.bpm}**`;
+  songStr += '\n- Charts:';
+  if (!Number.isNaN(song.beginner)) {
+    songStr += `\n\t\t**Beginner (${song.beginner})**`;
+  }
+  if (!Number.isNaN(song.spn)) {
+    songStr += `\n\t\t**Normal (${song.spn})**`;
+  }
+  if (!Number.isNaN(song.sph)) {
+    songStr += `\n\t\t**Hyper (${song.sph})**`;
+  }
+  if (!Number.isNaN(song.spa)) {
+    songStr += `\n\t\t**Another (${song.spa})**`;
+  }
+  songStr += `\n- IIDX Style: **${song.style}**`;
+  songStr += `\n- First IIDX Appearance: **${song.origin}**`;
+  songStr += `\n- Requires Subscription?: **${(song.price.toLowerCase() === 'free' ? 'No' : 'Yes')}**`;
+  songStr += `\n- Added on **${song.dateAdded}${song.removed.length > 0 ? ' (Now Removed)' : ''}**`;
+
+  // Returning the formatted song string
+  return songStr;
+}
+
 // search()
 function search(paramString) {
   // Defining the returning array
@@ -317,8 +346,11 @@ function help() {
 // Setting up the exports
 module.exports = {
   ModuleName: 'IIDXMobile',
+  FullGameName: 'IIDX Ultimate Mobile',
+  CommandIdentities: ['iidxmobile', 'iidxm'],
   Load: loadSongs,
   Songs: iidxmSongs,
+  Format: format,
   Search: search,
   Help: help,
 };
