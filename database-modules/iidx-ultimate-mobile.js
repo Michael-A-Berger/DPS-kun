@@ -7,6 +7,22 @@ const database = require(`${__dirname}/../database.js`);
 const songFile = `${__dirname}/../database/iidx-ultimate-mobile.csv`;
 const identities = ['iidxmobile', 'iidxm'];
 const iidxmSongs = [];
+const searchParams = {};
+
+// Defining the search parameters
+database.DefineSearchParam(searchParams, 'name', 'Song name contains \'?\' (no spaces)', '', ':?');
+database.DefineSearchParam(searchParams, 'artist', 'Song artist name contains \'?\' (no spaces)', '', ':?');
+database.DefineSearchParam(searchParams, 'genre', 'Song genre name contains \'?\' (no spaces)', '', ':?');
+database.DefineSearchParam(searchParams, 'bpm', 'Song\'s BPM exactly matches \'#\' (prepend \'~\' for range of -/+ 10 BPM)', 1, ':#');
+database.DefineSearchParam(searchParams, 'beginner', 'Song must have a Beginner difficulty chart (append \':#\' for exact difficulty, \':~#\' for range)', 1);
+database.DefineSearchParam(searchParams, 'normal', searchParams.beginner.description.replace('Beginner', 'Normal'), 1);
+database.DefineSearchParam(searchParams, 'hyper', searchParams.beginner.description.replace('Beginner', 'Hyper'), 1);
+database.DefineSearchParam(searchParams, 'another', searchParams.beginner.description.replace('a Beginner', 'an Another'), 1);
+database.DefineSearchParam(searchParams, 'style', 'The style the song is sorted under in-game (Options: 1 -> 27, mobile)', '', ':?');
+database.DefineSearchParam(searchParams, 'origin', 'The original IIDX game the song first apeared in (Options: 1 -> 27, substream, 3CS -> 16CS, mobile)', '', ':?');
+database.DefineSearchParam(searchParams, 'price', 'Whether the song costs money to play (Options: free, subscription)', '', ':?');
+database.DefineSearchParam(searchParams, 'allsongs', 'Includes both playable and removed songs');
+database.DefineSearchParam(searchParams, 'removed', 'Only returns removed songs');
 
 // Newline Variable
 const newlineChar = process.env.NEWLINE_CHAR;
@@ -323,40 +339,21 @@ function search(paramString) {
   return songMatches;
 }
 
-// help()
-function help() {
-  const str = `Proper Usage:\n\`\`\`<dps_cmd> ${identities[0]} [name:?] [artist:?] [beginner] [normal] `
-              + '[hyper] [another] [style:?] [price:?]\n\n'
-              + '- [name:?]    = Song name contains \'?\' (no spaces)\n'
-              + '- [artist:?]  = Song artist name contains \'?\' (no spaces)\n'
-              + '- [beginner]  = Song must have a Beginner difficulty chart (append \':#\' for exact difficulty, \':~#\' for range)\n'
-              + '- [normal]    = Song must have a Normal difficulty chart (append \':#\' for exact difficulty, \':~#\' for range)\n'
-              + '- [hyper]     = Song must have a Hyper difficulty chart (append \':#\' for exact difficulty, \':~#\' for range)\n'
-              + '- [another]   = Song must have an Another difficulty chart (append \':#\' for exact difficulty, \':~#\' for range)\n'
-              + '- [style:?]   = \'?\' is the style the song is sorted under in-game (Options: 1 -> 27, mobile)\n'
-              + '- [price:?]   = Whether the song costs money to play (Options: free, subscription)\n'
-              + `\`\`\`(Issue \` <dps_cmd> ${identities[0]} help2 \` for all options)`;
-  return str;
+// helpShort()
+function helpShort() {
+  const exclusions = [
+    'genre',
+    'bpm',
+    'origin',
+    'allsongs',
+    'removed',
+  ];
+  return database.HelpFromSearchParams(searchParams, identities[0], exclusions);
 }
 
-function help2() {
-  const str = `Proper Usage:\n\`\`\`<dps_cmd> ${identities[0]} [name:?] [artist:?] [genre:?] [bpm:?] `
-              + '[beginner] [normal] [hyper] [another] [style:?] [origin:?] [price:?] [allsongs/removed]\n\n'
-              + '- [name:?]    = Song name contains \'?\' (no spaces)\n'
-              + '- [artist:?]  = Song artist name contains \'?\' (no spaces)\n'
-              + '- [genre:?]   = Song genre name contains \'?\' (no spaces)\n'
-              + '- [bpm:#]     = Song\'s BPM exactly matches \'#\' (prepend \'~\' for range of -/+ 10 BPM)\n'
-              + '- [beginner]  = Song must have a Beginner difficulty chart (append \':#\' for exact difficulty, \':~#\' for range)\n'
-              + '- [normal]    = Song must have a Normal difficulty chart (append \':#\' for exact difficulty, \':~#\' for range)\n'
-              + '- [hyper]     = Song must have a Hyper difficulty chart (append \':#\' for exact difficulty, \':~#\' for range)\n'
-              + '- [another]   = Song must have an Another difficulty chart (append \':#\' for exact difficulty, \':~#\' for range)\n'
-              + '- [style:?]   = \'?\' is the style the song is sorted under in-game (Options: 1 -> 27, mobile)\n'
-              + '- [origin:?]  = \'?\' is the original IIDX game the song first apeared in (Options: 1 -> 27, substream, 3CS -> 16CS, mobile)\n'
-              + '- [price:?]   = Whether the song costs money to play (Options: free, subscription)\n'
-              + '- [allsongs]  = Includes both playable and removed songs\n'
-              + '- [removed]   = Only returns removed songs\n'
-              + '```';
-  return str;
+// helpFull
+function helpFull() {
+  return database.HelpFromSearchParams(searchParams, identities[0]);
 }
 
 // Setting up the exports
@@ -368,6 +365,6 @@ module.exports = {
   Songs: iidxmSongs,
   Format: format,
   Search: search,
-  Help: help,
-  Help2: help2,
+  Help: helpShort,
+  Help2: helpFull,
 };
