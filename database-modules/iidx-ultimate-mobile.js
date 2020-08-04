@@ -4,25 +4,26 @@ const fs = require('fs');
 const database = require(`${__dirname}/../database.js`);
 
 // Constant variables
+const header = '\:cd:\:point_left:';
 const songFile = `${__dirname}/../database/iidx-ultimate-mobile.csv`;
 const identities = ['iidxmobile', 'iidxm'];
 const iidxmSongs = [];
 const searchParams = {};
 
 // Defining the search parameters
-database.DefineSearchParam(searchParams, 'name', 'Song name contains \'?\' (no spaces)', '', ':?');
-database.DefineSearchParam(searchParams, 'artist', 'Song artist name contains \'?\' (no spaces)', '', ':?');
-database.DefineSearchParam(searchParams, 'genre', 'Song genre name contains \'?\' (no spaces)', '', ':?');
-database.DefineSearchParam(searchParams, 'bpm', 'Song\'s BPM exactly matches \'#\' (prepend \'~\' for range of -/+ 10 BPM)', 1, ':#');
-database.DefineSearchParam(searchParams, 'beginner', 'Song must have a Beginner difficulty chart (append \':#\' for exact difficulty, \':~#\' for range)', 1);
-database.DefineSearchParam(searchParams, 'normal', searchParams.beginner.description.replace('Beginner', 'Normal'), 1);
-database.DefineSearchParam(searchParams, 'hyper', searchParams.beginner.description.replace('Beginner', 'Hyper'), 1);
-database.DefineSearchParam(searchParams, 'another', searchParams.beginner.description.replace('a Beginner', 'an Another'), 1);
-database.DefineSearchParam(searchParams, 'style', 'The style the song is sorted under in-game (Options: 1 -> 27, mobile)', '', ':?');
-database.DefineSearchParam(searchParams, 'origin', 'The original IIDX game the song first apeared in (Options: 1 -> 27, substream, 3CS -> 16CS, mobile)', '', ':?');
-database.DefineSearchParam(searchParams, 'price', 'Whether the song costs money to play (Options: free, subscription)', '', ':?');
-database.DefineSearchParam(searchParams, 'allsongs', 'Includes both playable and removed songs');
-database.DefineSearchParam(searchParams, 'removed', 'Only returns removed songs');
+searchParams.name = database.DefineSearchParam('Song name contains \'?\' (no spaces)', '', ':?');
+searchParams.artist = database.DefineSearchParam('Song artist name contains \'?\' (no spaces)', '', ':?');
+searchParams.genre = database.DefineSearchParam('Song genre name contains \'?\' (no spaces)', '', ':?');
+searchParams.bpm = database.DefineSearchParam('Song\'s BPM exactly matches \'#\' (prepend \'~\' for range of -/+ 10 BPM)', 1, ':#');
+searchParams.beginner = database.DefineSearchParam('Song must have a Beginner difficulty chart (append \':#\' for exact difficulty, \':~#\' for range)', 1);
+searchParams.normal = database.DefineSearchParam(searchParams.beginner.description.replace('Beginner', 'Normal'), 1);
+searchParams.hyper = database.DefineSearchParam(searchParams.beginner.description.replace('Beginner', 'Hyper'), 1);
+searchParams.another = database.DefineSearchParam(searchParams.beginner.description.replace('a Beginner', 'an Another'), 1);
+searchParams.style = database.DefineSearchParam('The style the song is sorted under in-game (Options: 1 -> 27, mobile)', '', ':?');
+searchParams.origin = database.DefineSearchParam('The original IIDX game the song first apeared in (Options: 1 -> 27, substream, 3CS -> 16CS, mobile)', '', ':?');
+searchParams.price = database.DefineSearchParam('Whether the song costs money to play (Options: free, subscription)', '', ':?');
+searchParams.allsongs = database.DefineSearchParam('Includes both playable and removed songs');
+searchParams.removed = database.DefineSearchParam('Only returns removed songs');
 
 // Newline Variable
 const newlineChar = process.env.NEWLINE_CHAR;
@@ -65,8 +66,8 @@ function loadSongs() {
 // format()
 function format(song) {
   // Formatting the song
-  let songStr = `\:cd:\:point_left:\t**${song.name}**\t\:point_right:\:cd:`;
-  songStr += `\n- Composed by **${song.artist}**`;
+  let songStr = `${header}\t**${song.name}**\t${database.ReverseEmoji(header)}`;
+  songStr += `\n- Artist: **${song.artist}**`;
   songStr += `\n- Genre: **${song.genre}**`;
   songStr += `\n- BPM: **${song.bpm}**`;
   songStr += '\n- Charts:';

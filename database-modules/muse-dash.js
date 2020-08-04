@@ -4,20 +4,21 @@ const fs = require('fs');
 const database = require(`${__dirname}/../database.js`);
 
 // Constant variables
+const header = '\:guitar:\:bear:\:violin:';
 const songFile = `${__dirname}/../database/muse-dash.csv`;
 const identities = ['musedash', 'msds'];
 const msdsSongs = [];
 const searchParams = {};
 
 // Desining the search parameters
-database.DefineSearchParam(searchParams, 'name', 'Song name contains \'?\' (no spaces)', '', ':?');
-database.DefineSearchParam(searchParams, 'artist', 'Song artist name contains \'?\' (no spaces)', '', ':?');
-database.DefineSearchParam(searchParams, 'bpm', 'Song\'s BPM exactly matches \'#\' (prepend \'~\' for range of -/+ 10 BPM)', 1, ':#');
-database.DefineSearchParam(searchParams, 'easy', 'Song must have an Easy difficulty chart (append \':#\' for exact difficulty, \':~#\' for range)', 1);
-database.DefineSearchParam(searchParams, 'hard', searchParams.easy.description.replace('an Easy', 'a Hard'), 1);
-database.DefineSearchParam(searchParams, 'master', searchParams.easy.description.replace('an Easy', 'a Master'), 1);
-database.DefineSearchParam(searchParams, 'hidden', searchParams.easy.description.replace('an Easy', 'a Hidden'), 1);
-database.DefineSearchParam(searchParams, 'pack', 'Song must come from a pack whose name contains \'?\' (no spaces)', '', ':?');
+searchParams.name = database.DefineSearchParam('Song name contains \'?\' (no spaces)', '', ':?');
+searchParams.artist = database.DefineSearchParam('Song artist name contains \'?\' (no spaces)', '', ':?');
+searchParams.bpm = database.DefineSearchParam('Song\'s BPM exactly matches \'#\' (prepend \'~\' for range of -/+ 10 BPM)', 1, ':#');
+searchParams.easy = database.DefineSearchParam('Song must have an Easy difficulty chart (append \':#\' for exact difficulty, \':~#\' for range)', 1);
+searchParams.hard = database.DefineSearchParam(searchParams.easy.description.replace('an Easy', 'a Hard'), 1);
+searchParams.master = database.DefineSearchParam(searchParams.easy.description.replace('an Easy', 'a Master'), 1);
+searchParams.hidden = database.DefineSearchParam(searchParams.easy.description.replace('an Easy', 'a Hidden'), 1);
+searchParams.pack = database.DefineSearchParam('Song must come from a pack whose name contains \'?\' (no spaces)', '', ':?');
 
 // Newline Variable
 const newlineChar = process.env.NEWLINE_CHAR;
@@ -81,7 +82,7 @@ function loadSongs() {
 // format()
 function format(song) {
   // Formatting the song
-  let songStr = `\:guitar:\:bear:\:violin:\t**${song.name}**\t\:violin:\:bear:\:guitar:`;
+  let songStr = `${header}\t**${song.name}**\t${database.ReverseEmoji(header)}`;
   songStr += `\n- Composed by **${song.artist}**`;
   songStr += `\n- Length: **${song.length}**`;
   songStr += `\n- BPM: **${song.bpm}**`;

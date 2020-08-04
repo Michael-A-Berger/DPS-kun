@@ -4,25 +4,26 @@ const fs = require('fs');
 const database = require(`${__dirname}/../database.js`);
 
 // Constant variables
+const header = '\:dancer:';
 const songFile = `${__dirname}/../database/piu-prime-2.csv`;
 const identities = ['piuprime2', 'prime2'];
 const prime2Songs = [];
 const searchParams = {};
 
 // Defining the search parameters
-database.DefineSearchParam(searchParams, 'name', 'Song name contains \'?\' (no spaces)', '', ':?');
-database.DefineSearchParam(searchParams, 'artist', 'Song artist name contains \'?\' (no spaces)', '', ':?');
-database.DefineSearchParam(searchParams, 'bpm', 'Song\'s BPM exactly matches \'#\' (prepend \'~\' for range of -/+ 10 BPM)', 1, ':#');
-database.DefineSearchParam(searchParams, 'type', '\'?\' is the song\' type (Options: normal, remix, full, short)', '', ':?');
-database.DefineSearchParam(searchParams, 'version', '\'?\' is the update number when the song was added (ex; 1.00, 1.09, 2.02, etc.)', '', ':?');
-database.DefineSearchParam(searchParams, 'single', 'Song must have a Single chart (append \':#\' for exact difficulty, \':~#\' for range)', 1);
-database.DefineSearchParam(searchParams, 'double', searchParams.single.description.replace('Single', 'Double'), 1);
-database.DefineSearchParam(searchParams, 'sperformance', searchParams.single.description.replace('Single', 'Single Performance'), 1);
-database.DefineSearchParam(searchParams, 'dperformance', searchParams.single.description.replace('Single', 'Double Performance'), 1);
-database.DefineSearchParam(searchParams, 'coop', 'Song must have a Co-op chart (append \':#\' for number of players, \':~#\' for range)', 1);
-database.DefineSearchParam(searchParams, 'series', 'The in-game subseries label the song has been given (ex; nx, fiesta, prime, etc.)', '', ':?');
-database.DefineSearchParam(searchParams, 'channel', 'The in-game channel the song resides in (ex; original, world, xross, etc.)', '', ':?');
-database.DefineSearchParam(searchParams, 'exclusive', 'The region the song is exclusive to (Options: philippines, latin)', '', ':?');
+searchParams.name = database.DefineSearchParam('Song name contains \'?\' (no spaces)', '', ':?');
+searchParams.artist = database.DefineSearchParam('Song artist name contains \'?\' (no spaces)', '', ':?');
+searchParams.bpm = database.DefineSearchParam('Song\'s BPM exactly matches \'#\' (prepend \'~\' for range of -/+ 10 BPM)', 1, ':#');
+searchParams.type = database.DefineSearchParam('\'?\' is the song\' type (Options: normal, remix, full, short)', '', ':?');
+searchParams.version = database.DefineSearchParam('\'?\' is the update number when the song was added (ex; 1.00, 1.09, 2.02, etc.)', '', ':?');
+searchParams.single = database.DefineSearchParam('Song must have a Single chart (append \':#\' for exact difficulty, \':~#\' for range)', 1);
+searchParams.double = database.DefineSearchParam(searchParams.single.description.replace('Single', 'Double'), 1);
+searchParams.sperformance = database.DefineSearchParam(searchParams.single.description.replace('Single', 'Single Performance'), 1);
+searchParams.dperformance = database.DefineSearchParam(searchParams.single.description.replace('Single', 'Double Performance'), 1);
+searchParams.coop = database.DefineSearchParam('Song must have a Co-op chart (append \':#\' for number of players, \':~#\' for range)', 1);
+searchParams.series = database.DefineSearchParam('The in-game subseries label the song has been given (ex; nx, fiesta, prime, etc.)', '', ':?');
+searchParams.channel = database.DefineSearchParam('The in-game channel the song resides in (ex; original, world, xross, etc.)', '', ':?');
+searchParams.exclusive = database.DefineSearchParam('The region the song is exclusive to (Options: philippines, latin)', '', ':?');
 
 // Newline Variable
 const newlineChar = process.env.NEWLINE_CHAR;
@@ -84,7 +85,7 @@ function loadSongs() {
 // format()
 function format(song) {
   // Formatting the song
-  let songStr = `\:dancer:\t**${song.name} (${song.type})**\t\:dancer:`;
+  let songStr = `${header}\t**${song.name} (${song.type})**\t${database.ReverseEmoji(header)}`;
   songStr += `\n- Composed by **${song.artist}**`;
   songStr += `\n- BPM: **${song.bpm}**`;
   songStr += '\n- Charts:';

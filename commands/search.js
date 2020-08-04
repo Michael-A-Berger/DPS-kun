@@ -28,7 +28,7 @@ function formatSearchPreview(searchParams, results, start) {
   return str;
 }
 
-// addReacts()
+// addPreviewReacts()
 function addPreviewReacts(sent, resultsLength, start) {
   for (let num = 0; num < resultsEmoji.length && num + start < resultsLength; num++) {
     sent.react(resultsEmoji[num]);
@@ -113,19 +113,27 @@ function searchDatabase(message, chosenMod) {
     }
   };
 
-  // Sending the initial message
-  message.channel.send(str)
-    // Adding the initial reactions
-    .then((sent) => {
-      sentMsg = sent;
-      // resultsEmoji.forEach((emoji) => sentMsg.react(emoji));
-      // sentMsg.react('🔽');
-      addPreviewReacts(sentMsg, searchResults.length, arrayStart);
-      // Waiting for reactions
-      sentMsg.awaitReactions(filter, reactOptions)
-        .then(processor)
-        .catch(remove); // Do nothing, just stop reacting
-    });
+  // IF the search results were larger than zero, show them
+  if (searchResults.length > 0) {
+    // Sending the initial message
+    message.channel.send(str)
+      // Adding the initial reactions
+      .then((sent) => {
+        sentMsg = sent;
+        addPreviewReacts(sentMsg, searchResults.length, arrayStart);
+        // Waiting for reactions
+        sentMsg.awaitReactions(filter, reactOptions)
+          .then(processor)
+          .catch(remove); // Do nothing, just stop reacting
+      });
+  } else {
+    // ELSE just send a message back saying that there were no results
+    str = '\:open_file_folder: No songs could be found with those parameters! '
+              + `Enter \` search ${databaseMods[chosenMod].CommandIdentities[0]} help \` `
+              + 'to see the list of valid search options for this game.';
+    message.channel.send(str);
+  }
+  
 }
 
 // search()

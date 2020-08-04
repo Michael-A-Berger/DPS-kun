@@ -4,19 +4,20 @@ const fs = require('fs');
 const database = require(`${__dirname}/../database.js`);
 
 // Constant variables
+const header = '\:headphones:\:desktop:';
 const songFile = `${__dirname}/../database/groove-coaster-pc.csv`;
 const identities = ['groovecoasterpc', 'gcpc'];
 const gcpcSongs = [];
 const searchParams = {};
 
 // Defining the search parameters
-database.DefineSearchParam(searchParams, 'name', 'Song name contains \'?\' (no spaces)', '', ':?');
-database.DefineSearchParam(searchParams, 'artist', 'Song artist name contains \'?\' (no spaces)', '', ':?');
-database.DefineSearchParam(searchParams, 'bpm', 'Song\'s BPM exactly matches \'#\' (prepend \'~\' for range of -/+ 10 BPM)', 1, ':#');
-database.DefineSearchParam(searchParams, 'simple', 'Song must have a Simple difficulty chart (append \':#\' for exact difficulty, \':~#\' for range)', 1);
-database.DefineSearchParam(searchParams, 'normal', searchParams.simple.description.replace('Simple', 'Normal'), 1);
-database.DefineSearchParam(searchParams, 'hard', searchParams.simple.description.replace('Simple', 'Hard'), 1);
-database.DefineSearchParam(searchParams, 'extra', searchParams.simple.description.replace('a Simple', 'an Extra'), 1);
+searchParams.name = database.DefineSearchParam('Song name contains \'?\' (no spaces)', '', ':?');
+searchParams.artist = database.DefineSearchParam('Song artist name contains \'?\' (no spaces)', '', ':?');
+searchParams.bpm = database.DefineSearchParam('Song\'s BPM exactly matches \'#\' (prepend \'~\' for range of -/+ 10 BPM)', 1, ':#');
+searchParams.simple = database.DefineSearchParam('Song must have a Simple difficulty chart (append \':#\' for exact difficulty, \':~#\' for range)', 1);
+searchParams.normal = database.DefineSearchParam(searchParams.simple.description.replace('Simple', 'Normal'), 1);
+searchParams.hard = database.DefineSearchParam(searchParams.simple.description.replace('Simple', 'Hard'), 1);
+searchParams.extra = database.DefineSearchParam(searchParams.simple.description.replace('a Simple', 'an Extra'), 1);
 
 // Newline Variable
 const newlineChar = process.env.NEWLINE_CHAR;
@@ -55,7 +56,7 @@ function loadSongs() {
 // format()
 function format(song) {
   // Formatting the song string
-  let songStr = `\:headphones:\:desktop:\t**${song.name}**\t\:desktop:\:headphones:`;
+  let songStr = `${header}\t**${song.name}**\t${database.ReverseEmoji(header)}`;
   songStr += `\n- Composed by **${song.artist}**`;
   songStr += `\n- BPM: **${song.bpm}**`;
   songStr += '\n- Charts:';
@@ -78,7 +79,7 @@ function format(song) {
   return songStr;
 }
 
-// search2()
+// search()
 function search(paramString) {
   // Defining the returning array
   let songMatches = [];

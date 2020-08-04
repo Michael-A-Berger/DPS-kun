@@ -23,8 +23,8 @@ let identityDictionary = [];
  */
 
 // defineSearchParam()
-function defineSearchParam(obj, param, desc, tp = undefined, apnd = '') {
-  obj[param] = {
+function defineSearchParam(desc, tp = undefined, apnd = '') {
+  return {
     append: apnd,
     description: desc,
     type: (tp !== undefined ? typeof tp : tp),
@@ -64,6 +64,7 @@ function searchTextToJSON(searchParams, searchText) {
     paramFound = false;
 
     // FOREACH search parameter
+    let range = false;
     searchNames.forEach((srchParam) => {
       // IF the parameter was not already found AND the parameter is a valid search parameter
       if (!paramFound && currentParam.startsWith(srchParam)) {
@@ -79,7 +80,7 @@ function searchTextToJSON(searchParams, searchText) {
               searchJSON[`${srchParam}Term`] = currentParam.substr(colonPos + 1);
               break;
             case 'number':
-              const range = (currentParam[colonPos + 1] === '~');
+              range = (currentParam[colonPos + 1] === '~');
               searchJSON[`${srchParam}Range`] = range;
               searchJSON[`${srchParam}Term`] = parseFloat(currentParam.substr(colonPos + (range ? 2 : 1)));
               break;
@@ -97,60 +98,7 @@ function searchTextToJSON(searchParams, searchText) {
 }
 
 // songStringCompare()
-function songStringCompare(song, property, exact, matchPhrase, equal = false) {
-  // Defining the result variable to return
-  let result = false;
-
-  // IF the song exists...
-  if (song !== undefined) {
-    // IF we're looking for an exact match...
-    if (exact) {
-      // IF an equal match is requested, check if the strings are equal (barring letter case)
-      if (equal) {
-        result = song[property].toLowerCase() === matchPhrase;
-      } else {
-        // ELSE check if the matching phrase exists in the string
-        result = (song[property].toLowerCase().indexOf(matchPhrase) > -1);
-      }
-    } else {
-      // ELSE just check if the property exists and is NOT undefined
-      result = (song[property] !== undefined);
-    }
-  }
-
-  // Returning the result
-  return result;
-}
-
-// songIntCompare()
-function songIntCompare(song, property, exact, matchNum, range) {
-  // Defining the result variable to return
-  let result = false;
-
-  // IF the song exists...
-  if (song !== undefined) {
-    // IF the passed matching number is defined...
-    if (!Number.isNaN(matchNum)) {
-      // IF we're looking for an exact match...
-      if (exact) {
-        // Checking if the property is the same as the matching number
-        result = (song[property] === matchNum);
-      } else {
-        // ELSE check if the property is within the specified range
-        result = (matchNum - range <= song[property] && matchNum + range >= song[property]);
-      }
-    } else {
-      // ELSE just check if the property exists and is a number
-      result = !Number.isNaN(song[property]);
-    }
-  }
-
-  // Returning the result
-  return result;
-}
-
-// songStringCompare2()
-function songStringCompare2(song, property, matchPhrase, equal = false) {
+function songStringCompare(song, property, matchPhrase, equal = false) {
   // Defining the result variable to return
   let result = false;
 
@@ -175,8 +123,8 @@ function songStringCompare2(song, property, matchPhrase, equal = false) {
   return result;
 }
 
-// songIntCompare2()
-function songIntCompare2(song, property, matchNum, range = 0) {
+// songIntCompare()
+function songIntCompare(song, property, matchNum, range = 0) {
   // Defining the result variable to return
   let result = false;
 
@@ -235,6 +183,18 @@ function helpFromSearchParams(searchParams, gameId, exceptions = []) {
   str = str.replace(/<game_id>/g, gameId);
 
   return str;
+}
+
+// reverseEmojis()
+function reverseEmoji(emojiStr) {
+  let result = '';
+  let emojies =  emojiStr.split(':\:');
+  for (let num = 0; num < emojies.length; num++) {
+    if (num !== 0) emojies[num] = `\:${emojies[num]}`;
+    if (num !== emojies.length - 1) emojies[num] = `${emojies[num]}:`;
+  }
+  result = emojies.reverse().toString().replace(/,/g, '');
+  return result;
 }
 
 /* =============================
@@ -312,9 +272,8 @@ module.exports = {
   Modules: loadedModules,
   DefineSearchParam: defineSearchParam,
   SearchTextToJSON: searchTextToJSON,
-  SongStringCompare: songStringCompare,
-  SongIntCompare: songIntCompare,
-  SongStringCompare2: songStringCompare2,
-  SongIntCompare2: songIntCompare2,
+  SongStringCompare2: songStringCompare,
+  SongIntCompare2: songIntCompare,
   HelpFromSearchParams: helpFromSearchParams,
+  ReverseEmoji: reverseEmoji,
 };

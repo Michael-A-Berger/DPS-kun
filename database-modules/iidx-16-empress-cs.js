@@ -4,30 +4,31 @@ const fs = require('fs');
 const database = require(`${__dirname}/../database.js`);
 
 // Constant variables
+const header = '\:princess:\:cd:\:musical_keyboard:';
 const songFile = `${__dirname}/../database/iidx-16-empress-cs.csv`;
 const identities = ['iidx16cs'];
 const iidx16csSongs = [];
 const searchParams = {};
 
 // Defining the search parameters
-database.DefineSearchParam(searchParams, 'name', 'Song name contains \'?\' (no spaces)', '', ':?');
-database.DefineSearchParam(searchParams, 'artist', 'Song artist name contains \'?\' (no spaces)', '', ':?');
-database.DefineSearchParam(searchParams, 'genre', 'Song genre name contains \'?\' (no spaces)', '', ':?');
-database.DefineSearchParam(searchParams, 'bpm', 'Song\'s BPM exactly matches \'#\' (prepend \'~\' for range of -/+ 10 BPM)', 1, ':#');
-database.DefineSearchParam(searchParams, 'beginner', 'Song must have a Beginner difficulty chart (append \':#\' for exact difficulty, \':~#\' for range)', 1);
-database.DefineSearchParam(searchParams, 'spn', searchParams.beginner.description.replace('Beginner', 'Single Normal'), 1);
-database.DefineSearchParam(searchParams, 'sph', searchParams.beginner.description.replace('Beginner', 'Single Hyper'), 1);
-database.DefineSearchParam(searchParams, 'spa', searchParams.beginner.description.replace('Beginner', 'Single Another'), 1);
-database.DefineSearchParam(searchParams, 'spka', searchParams.beginner.description.replace('Beginner', 'Single Black Another'), 1);
-database.DefineSearchParam(searchParams, 'dpn', searchParams.beginner.description.replace('Beginner', 'Double Normal'), 1);
-database.DefineSearchParam(searchParams, 'dph', searchParams.beginner.description.replace('Beginner', 'Double Hyper'), 1);
-database.DefineSearchParam(searchParams, 'dpa', searchParams.beginner.description.replace('Beginner', 'Double Another'), 1);
-database.DefineSearchParam(searchParams, 'dpka', searchParams.beginner.description.replace('Beginner', 'Double Black Another'), 1);
-database.DefineSearchParam(searchParams, 'disc', 'Which disc the song is on (Options: empress, premium)', '', ':?');
-database.DefineSearchParam(searchParams, 'style', 'The style the song is sorted under in-game (Options: 1 -> 16, substream)', '', ':?');
-database.DefineSearchParam(searchParams, 'origin', 'The original IIDX game the song first apeared in (Options: 1 -> 16, substream, 3CS -> 16CS)', '', ':?');
-database.DefineSearchParam(searchParams, 'allsongs', 'Includes both base songs and unlocks');
-database.DefineSearchParam(searchParams, 'unlocks', 'Only returns unlockable songs');
+searchParams.name = database.DefineSearchParam('Song name contains \'?\' (no spaces)', '', ':?');
+searchParams.artist = database.DefineSearchParam('Song artist name contains \'?\' (no spaces)', '', ':?');
+searchParams.genre = database.DefineSearchParam('Song genre name contains \'?\' (no spaces)', '', ':?');
+searchParams.bpm = database.DefineSearchParam('Song\'s BPM exactly matches \'#\' (prepend \'~\' for range of -/+ 10 BPM)', 1, ':#');
+searchParams.beginner = database.DefineSearchParam('Song must have a Beginner difficulty chart (append \':#\' for exact difficulty, \':~#\' for range)', 1);
+searchParams.spn = database.DefineSearchParam(searchParams.beginner.description.replace('Beginner', 'Single Normal'), 1);
+searchParams.sph = database.DefineSearchParam(searchParams.beginner.description.replace('Beginner', 'Single Hyper'), 1);
+searchParams.spa = database.DefineSearchParam(searchParams.beginner.description.replace('Beginner', 'Single Another'), 1);
+searchParams.spka = database.DefineSearchParam(searchParams.beginner.description.replace('Beginner', 'Single Black Another'), 1);
+searchParams.dpn = database.DefineSearchParam(searchParams.beginner.description.replace('Beginner', 'Double Normal'), 1);
+searchParams.dph = database.DefineSearchParam(searchParams.beginner.description.replace('Beginner', 'Double Hyper'), 1);
+searchParams.dpa = database.DefineSearchParam(searchParams.beginner.description.replace('Beginner', 'Double Another'), 1);
+searchParams.dpka = database.DefineSearchParam(searchParams.beginner.description.replace('Beginner', 'Double Black Another'), 1);
+searchParams.disc = database.DefineSearchParam('Which disc the song is on (Options: empress, premium)', '', ':?');
+searchParams.style = database.DefineSearchParam('The style the song is sorted under in-game (Options: 1 -> 16, substream)', '', ':?');
+searchParams.origin = database.DefineSearchParam('The original IIDX game the song first apeared in (Options: 1 -> 16, substream, 3CS -> 16CS)', '', ':?');
+searchParams.allsongs = database.DefineSearchParam('Includes both base songs and unlocks');
+searchParams.unlocks = database.DefineSearchParam('Only returns unlockable songs');
 
 // Newline Variable
 const newlineChar = process.env.NEWLINE_CHAR;
@@ -104,7 +105,7 @@ function loadSongs() {
 function format(song) {
   console.dir(song);
   // Formatting the song
-  let songStr = `\:princess:\:cd:\:musical_keyboard:\t**${song.name}**\t\:musical_keyboard:\:cd:\:princess:`;
+  let songStr = `${header}\t**${song.name}**\t${database.ReverseEmoji(header)}`;
   songStr += `\n- Artist: **${song.artist}**`;
   songStr += `\n- Genre: **${song.genre}**`;
   songStr += `\n- BPM: **${song.bpm}**`;
