@@ -187,7 +187,7 @@ function songIntCompare2(song, property, matchNum, range = 0) {
       result = (song[property] >= matchNum - range && song[property] <= matchNum + range);
     } else {
       // ELSE check if the property is defined
-      result = !Math.isNaN(song[property]);
+      result = !Number.isNaN(song[property]);
     }
   }
 
@@ -225,12 +225,12 @@ function helpFromSearchParams(searchParams, gameId, exceptions = []) {
     }
   });
   str += '```';
-  
+
   // Adding the full help message
   if (exceptions.length > 0) {
     str += '(Issue ` <dps_cmd> <game_id> help2 ` for all options)';
   }
-  
+
   // Replacing the generic game ID instances
   str = str.replace(/<game_id>/g, gameId);
 

@@ -96,240 +96,96 @@ function search(paramString) {
   // Defining the returning array
   let songMatches = [];
 
-  // Splitting up the parameter string
-  const params = paramString.toLowerCase().split(' ');
-
-  // =================================
-  // ===== PARSING SONG CRITERIA =====
-  // =================================
-
-  // Defining the match variables
-  let genreToMatch = '';
-  let exactGenre;
-  let nameToMatch = '';
-  let exactName;
-  let artistToMatch = '';
-  let exactArtist;
-  let bpmToMatch = '';
-  let exactBpm;
-  let beginnerToMatch = NaN;
-  let exactBeginner;
-  let spnToMatch = NaN;
-  let exactSPN;
-  let sphToMatch = NaN;
-  let exactSPH;
-  let spaToMatch = NaN;
-  let exactSPA;
-  let styleToMatch = '';
-  let exactStyle;
-  let originToMatch = '';
-  let exactOrigin;
-  let priceToMatch = '';
-  let exactPrice;
-  let exactRemoved = false;
-
-  // Processing the passed parameters
-  let currentParam = '';
-  let colonPos = -1;
-  let paramFound = false;
-  for (let num = 0; num < params.length; num++) {
-    // Getting the current parameter
-    currentParam = params[num];
-    paramFound = false;
-
-    // Genre
-    if (!paramFound && currentParam.startsWith('genre')) {
-      paramFound = true;
-      colonPos = currentParam.indexOf(':');
-      if (colonPos !== -1) {
-        exactGenre = true;
-        genreToMatch = currentParam.substr(colonPos + 1);
-      } else { exactGenre = false; }
-    }
-
-    // Name
-    if (!paramFound && currentParam.startsWith('name')) {
-      paramFound = true;
-      colonPos = currentParam.indexOf(':');
-      if (colonPos !== -1) {
-        exactName = true;
-        nameToMatch = currentParam.substr(colonPos + 1);
-      } else { exactName = false; }
-    }
-
-    // Artist
-    if (!paramFound && currentParam.startsWith('artist')) {
-      paramFound = true;
-      colonPos = currentParam.indexOf(':');
-      if (colonPos !== -1) {
-        exactArtist = true;
-        artistToMatch = currentParam.substr(colonPos + 1);
-      } else { exactArtist = false; }
-    }
-
-    // BPM
-    if (!paramFound && currentParam.startsWith('bpm')) {
-      paramFound = true;
-      colonPos = currentParam.indexOf(':');
-      if (colonPos !== -1) {
-        if (currentParam[colonPos + 1] !== '~') { exactBpm = true; } else { exactBpm = false; }
-        bpmToMatch = currentParam.substr(colonPos + (exactBpm ? 1 : 2));
-      } else { exactBpm = false; }
-    }
-
-    // Beginner
-    if (!paramFound && currentParam.startsWith('beginner')) {
-      paramFound = true;
-      colonPos = currentParam.indexOf(':');
-      if (colonPos !== -1) {
-        if (currentParam[colonPos + 1] !== '~') { exactBeginner = true; } else { exactBeginner = false; }
-        beginnerToMatch = parseInt(currentParam.substr(colonPos + (exactBeginner ? 1 : 2)), 10);
-      } else { exactBeginner = false; }
-    }
-
-    // SPN
-    if (!paramFound && currentParam.startsWith('normal')) {
-      paramFound = true;
-      colonPos = currentParam.indexOf(':');
-      if (colonPos !== -1) {
-        if (currentParam[colonPos + 1] !== '~') { exactSPN = true; } else { exactSPN = false; }
-        spnToMatch = parseInt(currentParam.substr(colonPos + (exactSPN ? 1 : 2)), 10);
-      } else { exactSPN = false; }
-    }
-
-    // SPH
-    if (!paramFound && currentParam.startsWith('hyper')) {
-      paramFound = true;
-      colonPos = currentParam.indexOf(':');
-      if (colonPos !== -1) {
-        if (currentParam[colonPos + 1] !== '~') { exactSPH = true; } else { exactSPH = false; }
-        sphToMatch = parseInt(currentParam.substr(colonPos + (exactSPH ? 1 : 2)), 10);
-      } else { exactSPH = false; }
-    }
-
-    // SPA
-    if (!paramFound && currentParam.startsWith('another')) {
-      paramFound = true;
-      colonPos = currentParam.indexOf(':');
-      if (colonPos !== -1) {
-        if (currentParam[colonPos + 1] !== '~') { exactSPA = true; } else { exactSPA = false; }
-        spaToMatch = parseInt(currentParam.substr(colonPos + (exactSPA ? 1 : 2)), 10);
-      } else { exactSPA = false; }
-    }
-
-    // Style
-    if (!paramFound && currentParam.startsWith('style')) {
-      paramFound = true;
-      colonPos = currentParam.indexOf(':');
-      if (colonPos !== -1) {
-        exactStyle = true;
-        styleToMatch = currentParam.substr(colonPos + 1);
-      } else { exactStyle = false; }
-    }
-
-    // Origin
-    if (!paramFound && currentParam.startsWith('origin')) {
-      paramFound = true;
-      colonPos = currentParam.indexOf(':');
-      if (colonPos !== -1) {
-        exactOrigin = true;
-        originToMatch = currentParam.substr(colonPos + 1);
-      } else { exactOrigin = false; }
-    }
-
-    // Price
-    if (!paramFound && currentParam.startsWith('price')) {
-      paramFound = true;
-      colonPos = currentParam.indexOf(':');
-      if (colonPos !== -1) {
-        exactPrice = true;
-        priceToMatch = currentParam.substr(colonPos + 1);
-      } else { exactPrice = false; }
-    }
-
-    // Removed
-    if (!paramFound && currentParam.startsWith('allsongs')) {
-      paramFound = true;
-      exactRemoved = undefined;
-    }
-    if (!paramFound && currentParam.startsWith('removed')) {
-      paramFound = true;
-      exactRemoved = true;
-    }
-  }
+  // Parsing the parameter string to a JSON object
+  const searchJSON = database.SearchTextToJSON(searchParams, paramString);
 
   // ==================================
   // ===== GETTING MATCHING SONGS =====
   // ==================================
   let criteriaMet = true;
+  let test = false;
+  let range = false;
   songMatches = iidxmSongs.filter((song) => {
     // Resetting the Criteria Met boolean
     criteriaMet = true;
 
     // Genre
-    if (exactGenre !== undefined) {
-      criteriaMet = criteriaMet && database.SongStringCompare(song, 'genre', exactGenre, genreToMatch);
+    if (searchJSON.genre) {
+      test = database.SongStringCompare2(song, 'genre', searchJSON.genreTerm);
+      criteriaMet = criteriaMet && test;
     }
 
     // Name
-    if (exactName !== undefined) {
-      criteriaMet = criteriaMet && database.SongStringCompare(song, 'name', exactName, nameToMatch);
+    if (searchJSON.name) {
+      test = database.SongStringCompare2(song, 'name', searchJSON.nameTerm);
+      criteriaMet = criteriaMet && test;
     }
 
     // Artist
-    if (exactArtist !== undefined) {
-      criteriaMet = criteriaMet && database.SongStringCompare(song, 'artist', exactArtist, artistToMatch);
+    if (searchJSON.artist) {
+      test = database.SongStringCompare2(song, 'artist', searchJSON.artistTerm);
+      criteriaMet = criteriaMet && test;
     }
 
     // BPM
-    if (exactBpm !== undefined) {
-      const matchBpm = parseInt(bpmToMatch.replace(/[^\d]/g, ''), 10);
+    if (searchJSON.bpm) {
       const songBpm = parseInt(song.bpm.replace(/[^\d]/g, ''), 10);
-      criteriaMet = criteriaMet && database.SongIntCompare({ bpm: songBpm }, 'bpm', exactBpm, matchBpm, 10);
+      range = searchJSON.bpmRange;
+      test = database.SongIntCompare2({ bpm: songBpm }, 'bpm', searchJSON.bpmTerm, (range ? 10 : 0));
+      criteriaMet = criteriaMet && test;
     }
 
     // Beginner
-    if (exactBeginner !== undefined) {
-      criteriaMet = criteriaMet && database.SongIntCompare(song, 'beginner', exactBeginner, beginnerToMatch, 1);
+    if (searchJSON.beginner) {
+      range = searchJSON.beginnerRange;
+      test = database.SongIntCompare2(song, 'beginner', searchJSON.beginnerTerm, (range ? 1 : 0));
+      criteriaMet = criteriaMet && test;
     }
 
     // SPN
-    if (exactSPN !== undefined) {
-      criteriaMet = criteriaMet && database.SongIntCompare(song, 'spn', exactSPN, spnToMatch, 1);
+    if (searchJSON.normal) {
+      range = searchJSON.normalRange;
+      test = database.SongIntCompare2(song, 'spn', searchJSON.normalTerm, (range ? 1 : 0));
+      criteriaMet = criteriaMet && test;
     }
 
     // SPH
-    if (exactSPH !== undefined) {
-      criteriaMet = criteriaMet && database.SongIntCompare(song, 'sph', exactSPH, sphToMatch, 1);
+    if (searchJSON.hyper) {
+      range = searchJSON.hyperRange;
+      test = database.SongIntCompare2(song, 'sph', searchJSON.hyperTerm, (range ? 1 : 0));
+      criteriaMet = criteriaMet && test;
     }
 
     // SPA
-    if (exactSPA !== undefined) {
-      criteriaMet = criteriaMet && database.SongIntCompare(song, 'spa', exactSPA, spaToMatch, 1);
+    if (searchJSON.another) {
+      range = searchJSON.anotherRange;
+      test = database.SongIntCompare2(song, 'spa', searchJSON.anotherTerm, (range ? 1 : 0));
+      criteriaMet = criteriaMet && test;
     }
 
     // Style
-    if (exactStyle !== undefined) {
-      criteriaMet = criteriaMet && database.SongStringCompare(song, 'style', exactStyle, styleToMatch, true);
+    if (searchJSON.style) {
+      test = database.SongStringCompare2(song, 'style', searchJSON.styleTerm, true);
+      criteriaMet = criteriaMet && test;
     }
 
     // Origin
-    if (exactOrigin !== undefined) {
-      criteriaMet = criteriaMet && database.SongStringCompare(song, 'origin', exactOrigin, originToMatch, true);
+    if (searchJSON.origin) {
+      test = database.SongStringCompare2(song, 'origin', searchJSON.originTerm, true);
+      criteriaMet = criteriaMet && test;
     }
 
     // Price
-    if (exactPrice !== undefined) {
-      criteriaMet = criteriaMet && database.SongStringCompare(song, 'price', exactPrice, priceToMatch);
+    if (searchJSON.price) {
+      test = database.SongStringCompare2(song, 'price', searchJSON.priceTerm);
+      criteriaMet = criteriaMet && test;
     }
 
-    // Removed
-    if (exactRemoved !== undefined) {
-      if (exactRemoved) {
-        criteriaMet = criteriaMet && database.SongStringCompare(song, 'removed', true, 'yes', true);
-      } else {
-        criteriaMet = criteriaMet && (song.removed === '');
-      }
+    // All Songs / Removed
+    if (!searchJSON.allsongs && !searchJSON.removed) {
+      criteriaMet = criteriaMet && (song.removed === '');
+    } else if (!searchJSON.allsongs && searchJSON.removed) {
+      criteriaMet = criteriaMet && (song.removed.toLowerCase() === 'yes');
     }
 
     return criteriaMet;

@@ -7,6 +7,16 @@ const database = require(`${__dirname}/../database.js`);
 const songFile = `${__dirname}/../database/groove-coaster-pc.csv`;
 const identities = ['groovecoasterpc', 'gcpc'];
 const gcpcSongs = [];
+const searchParams = {};
+
+// Defining the search parameters
+database.DefineSearchParam(searchParams, 'name', 'Song name contains \'?\' (no spaces)', '', ':?');
+database.DefineSearchParam(searchParams, 'artist', 'Song artist name contains \'?\' (no spaces)', '', ':?');
+database.DefineSearchParam(searchParams, 'bpm', 'Song\'s BPM exactly matches \'#\' (prepend \'~\' for range of -/+ 10 BPM)', 1, ':#');
+database.DefineSearchParam(searchParams, 'simple', 'Song must have a Simple difficulty chart (append \':#\' for exact difficulty, \':~#\' for range)', 1);
+database.DefineSearchParam(searchParams, 'normal', searchParams.simple.description.replace('Simple', 'Normal'), 1);
+database.DefineSearchParam(searchParams, 'hard', searchParams.simple.description.replace('Simple', 'Hard'), 1);
+database.DefineSearchParam(searchParams, 'extra', searchParams.simple.description.replace('a Simple', 'an Extra'), 1);
 
 // Newline Variable
 const newlineChar = process.env.NEWLINE_CHAR;
@@ -68,157 +78,70 @@ function format(song) {
   return songStr;
 }
 
-// search()
+// search2()
 function search(paramString) {
   // Defining the returning array
   let songMatches = [];
 
-  // Splitting up the parameter string
-  const params = paramString.toLowerCase().split(' ');
-
-  // =================================
-  // ===== PARSING SONG CRITERIA =====
-  // =================================
-
-  // Defining the match variables
-  let nameToMatch = '';
-  let exactName;
-  let artistToMatch = '';
-  let exactArtist;
-  let bpmToMatch = '';
-  let exactBpm;
-  let simpleToMatch = NaN;
-  let exactSimple;
-  let normalToMatch = NaN;
-  let exactNormal;
-  let hardToMatch = NaN;
-  let exactHard;
-  let extraToMatch = NaN;
-  let exactExtra;
-
-  // Processing the passed parameters
-  let currentParam = '';
-  let colonPos = -1;
-  let paramFound = false;
-  for (let num = 0; num < params.length; num++) {
-    // Getting the current parameter
-    currentParam = params[num];
-    paramFound = false;
-
-    // Name
-    if (!paramFound && currentParam.startsWith('name')) {
-      paramFound = true;
-      colonPos = currentParam.indexOf(':');
-      if (colonPos !== -1) {
-        exactName = true;
-        nameToMatch = currentParam.substr(colonPos + 1);
-      } else { exactName = false; }
-    }
-
-    // Artist
-    if (!paramFound && currentParam.startsWith('artist')) {
-      paramFound = true;
-      colonPos = currentParam.indexOf(':');
-      if (colonPos !== -1) {
-        exactArtist = true;
-        artistToMatch = currentParam.substr(colonPos + 1);
-      } else { exactArtist = false; }
-    }
-
-    // BPM
-    if (!paramFound && currentParam.startsWith('bpm')) {
-      paramFound = true;
-      colonPos = currentParam.indexOf(':');
-      if (colonPos !== -1) {
-        if (currentParam[colonPos + 1] !== '~') { exactBpm = true; } else { exactBpm = false; }
-        bpmToMatch = currentParam.substr(colonPos + (exactBpm ? 1 : 2));
-      } else { exactBpm = false; }
-    }
-
-    // Simple
-    if (!paramFound && currentParam.startsWith('simple')) {
-      paramFound = true;
-      colonPos = currentParam.indexOf(':');
-      if (colonPos !== -1) {
-        if (currentParam[colonPos + 1] !== '~') { exactSimple = true; } else { exactSimple = false; }
-        simpleToMatch = parseInt(currentParam.substr(colonPos + (exactSimple ? 1 : 2)), 10);
-      } else { exactSimple = false; }
-    }
-
-    // Normal
-    if (!paramFound && currentParam.startsWith('normal')) {
-      paramFound = true;
-      colonPos = currentParam.indexOf(':');
-      if (colonPos !== -1) {
-        if (currentParam[colonPos + 1] !== '~') { exactNormal = true; } else { exactNormal = false; }
-        normalToMatch = parseInt(currentParam.substr(colonPos + (exactNormal ? 1 : 2)), 10);
-      } else { exactNormal = false; }
-    }
-
-    // Hard
-    if (!paramFound && currentParam.startsWith('hard')) {
-      paramFound = true;
-      colonPos = currentParam.indexOf(':');
-      if (colonPos !== -1) {
-        if (currentParam[colonPos + 1] !== '~') { exactHard = true; } else { exactHard = false; }
-        hardToMatch = parseInt(currentParam.substr(colonPos + (exactHard ? 1 : 2)), 10);
-      } else { exactHard = false; }
-    }
-
-    // Extra
-    if (!paramFound && currentParam.startsWith('extra')) {
-      paramFound = true;
-      colonPos = currentParam.indexOf(':');
-      if (colonPos !== -1) {
-        if (currentParam[colonPos + 1] !== '~') { exactExtra = true; } else { exactExtra = false; }
-        extraToMatch = parseInt(currentParam.substr(colonPos + (exactExtra ? 1 : 2)), 10);
-      } else { exactExtra = false; }
-    }
-  }
+  // Parsing the parameter string to a JSON object
+  const searchJSON = database.SearchTextToJSON(searchParams, paramString);
 
   // ==================================
   // ===== GETTING MATCHING SONGS =====
   // ==================================
   let criteriaMet = true;
+  let test = false;
+  let range = false;
   songMatches = gcpcSongs.filter((song) => {
     // Resetting the Criteria Met boolean
     criteriaMet = true;
 
     // Name
-    if (exactName !== undefined) {
-      criteriaMet = criteriaMet && database.SongStringCompare(song, 'name', exactName, nameToMatch);
+    if (searchJSON.name) {
+      test = database.SongStringCompare2(song, 'name', searchJSON.nameTerm);
+      criteriaMet = criteriaMet && test;
     }
 
     // Artist
-    if (exactArtist !== undefined) {
-      criteriaMet = criteriaMet && database.SongStringCompare(song, 'artist', exactArtist, artistToMatch);
+    if (searchJSON.artist) {
+      test = database.SongStringCompare2(song, 'artist', searchJSON.artistTerm);
+      criteriaMet = criteriaMet && test;
     }
 
     // BPM
-    if (exactBpm !== undefined) {
-      const matchBpm = parseInt(bpmToMatch.replace(/[^\d]/g, ''), 10);
+    if (searchJSON.bpm) {
       const songBpm = parseInt(song.bpm.replace(/[^\d]/g, ''), 10);
-      criteriaMet = criteriaMet && database.SongIntCompare({ bpm: songBpm }, 'bpm', exactBpm, matchBpm, 10);
+      range = searchJSON.bpmRange;
+      test = database.SongIntCompare2({ bpm: songBpm }, 'bpm', searchJSON.bpmTerm, (range ? 10 : 0));
+      criteriaMet = criteriaMet && test;
     }
 
     // Simple
-    if (exactSimple !== undefined) {
-      criteriaMet = criteriaMet && database.SongIntCompare(song, 'simple', exactSimple, simpleToMatch, 1);
+    if (searchJSON.simple) {
+      range = searchJSON.simpleRange;
+      test = database.SongIntCompare2(song, 'simple', searchJSON.simpleTerm, (range ? 1 : 0));
+      criteriaMet = criteriaMet && test;
     }
 
     // Normal
-    if (exactNormal !== undefined) {
-      criteriaMet = criteriaMet && database.SongIntCompare(song, 'normal', exactNormal, normalToMatch, 1);
+    if (searchJSON.normal) {
+      range = searchJSON.normalRange;
+      test = database.SongIntCompare2(song, 'normal', searchJSON.normalTerm, (range ? 1 : 0));
+      criteriaMet = criteriaMet && test;
     }
 
     // Hard
-    if (exactHard !== undefined) {
-      criteriaMet = criteriaMet && database.SongIntCompare(song, 'hard', exactHard, hardToMatch, 1);
+    if (searchJSON.hard) {
+      range = searchJSON.hardRange;
+      test = database.SongIntCompare2(song, 'hard', searchJSON.hardTerm, (range ? 1 : 0));
+      criteriaMet = criteriaMet && test;
     }
 
     // Extra
-    if (exactExtra !== undefined) {
-      criteriaMet = criteriaMet && database.SongIntCompare(song, 'extra', exactExtra, extraToMatch, 1);
+    if (searchJSON.extra) {
+      range = searchJSON.extraRange;
+      test = database.SongIntCompare2(song, 'extra', searchJSON.extraTerm, (range ? 1 : 0));
+      criteriaMet = criteriaMet && test;
     }
 
     return criteriaMet;
@@ -228,19 +151,9 @@ function search(paramString) {
   return songMatches;
 }
 
-// help()
-function help() {
-  const str = `Proper Usage:\n\`\`\`<dps_cmd> ${identities[0]} [name:?] [artist:?] [bpm:?] [simple] `
-              + '[normal] [hard] [extra]\n\n'
-              + '- [name:?]    = Song name contains \'?\' (no spaces)\n'
-              + '- [artist:?]  = Song artist name contains \'?\' (no spaces)\n'
-              + '- [bpm:#]     = Song\'s BPM exactly matches \'#\' (prepend \'~\' for range of -/+ 10 BPM)\n'
-              + '- [simple]    = Song must have a Simple difficulty chart (append \':#\' for exact difficulty, \':~#\' for range)\n'
-              + '- [normal]    = Song must have a Normal difficulty chart (append \':#\' for exact difficulty, \':~#\' for range)\n'
-              + '- [hard]      = Song must have a Hard difficulty chart (append \':#\' for exact difficulty, \':~#\' for range)\n'
-              + '- [extra]     = Song must have an Extra difficulty chart (append \':#\' for exact difficulty, \':~#\' for range)\n'
-              + '```';
-  return str;
+// helpFull()
+function helpFull() {
+  return database.HelpFromSearchParams(searchParams, identities[0]);
 }
 
 // Setting up the exports
@@ -252,6 +165,6 @@ module.exports = {
   Songs: gcpcSongs,
   Format: format,
   Search: search,
-  Help: help,
-  Help2: help,
+  Help: helpFull,
+  Help2: helpFull,
 };

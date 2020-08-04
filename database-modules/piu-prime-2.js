@@ -7,6 +7,22 @@ const database = require(`${__dirname}/../database.js`);
 const songFile = `${__dirname}/../database/piu-prime-2.csv`;
 const identities = ['piuprime2', 'prime2'];
 const prime2Songs = [];
+const searchParams = {};
+
+// Defining the search parameters
+database.DefineSearchParam(searchParams, 'name', 'Song name contains \'?\' (no spaces)', '', ':?');
+database.DefineSearchParam(searchParams, 'artist', 'Song artist name contains \'?\' (no spaces)', '', ':?');
+database.DefineSearchParam(searchParams, 'bpm', 'Song\'s BPM exactly matches \'#\' (prepend \'~\' for range of -/+ 10 BPM)', 1, ':#');
+database.DefineSearchParam(searchParams, 'type', '\'?\' is the song\' type (Options: normal, remix, full, short)', '', ':?');
+database.DefineSearchParam(searchParams, 'version', '\'?\' is the update number when the song was added (ex; 1.00, 1.09, 2.02, etc.)', '', ':?');
+database.DefineSearchParam(searchParams, 'single', 'Song must have a Single chart (append \':#\' for exact difficulty, \':~#\' for range)', 1);
+database.DefineSearchParam(searchParams, 'double', searchParams.single.description.replace('Single', 'Double'), 1);
+database.DefineSearchParam(searchParams, 'sperformance', searchParams.single.description.replace('Single', 'Single Performance'), 1);
+database.DefineSearchParam(searchParams, 'dperformance', searchParams.single.description.replace('Single', 'Double Performance'), 1);
+database.DefineSearchParam(searchParams, 'coop', 'Song must have a Co-op chart (append \':#\' for number of players, \':~#\' for range)', 1);
+database.DefineSearchParam(searchParams, 'series', 'The in-game subseries label the song has been given (ex; nx, fiesta, prime, etc.)', '', ':?');
+database.DefineSearchParam(searchParams, 'channel', 'The in-game channel the song resides in (ex; original, world, xross, etc.)', '', ':?');
+database.DefineSearchParam(searchParams, 'exclusive', 'The region the song is exclusive to (Options: philippines, latin)', '', ':?');
 
 // Newline Variable
 const newlineChar = process.env.NEWLINE_CHAR;
@@ -108,258 +124,111 @@ function search(paramString) {
   // Defining the returning array
   let songMatches = [];
 
-  // Splitting up the parameters
-  const params = paramString.toLowerCase().split(' ');
-
-  /* =================================
-   * ===== PARSING SONG CRITERIA =====
-   * =================================
-   */
-
-  // Defining the match variables
-  let nameToMatch = '';
-  let exactName;
-  let artistToMatch = '';
-  let exactArtist;
-  let bpmToMatch = '';
-  let exactBpm;
-  let typeToMatch = '';
-  let exactType;
-  let singleToMatch = NaN;
-  let exactSingle;
-  let doubleToMatch = NaN;
-  let exactDouble;
-  let sPerformanceToMatch = NaN;
-  let exactSingleP;
-  let dPerformanceToMatch = NaN;
-  let exactDoubleP;
-  let coopToMatch = NaN;
-  let exactCoop;
-  let seriesToMatch = '';
-  let exactSeries;
-  let channelToMatch = '';
-  let exactChannel;
-  let exclusivityToMatch = '';
-  let exactExclusivity;
-
-  // Processing the passed parameters
-  let currentParam = '';
-  let colonPos = -1;
-  let paramFound = false;
-  for (let num = 0; num < params.length; num++) {
-    // Getting the current parameter
-    currentParam = params[num];
-    paramFound = false;
-
-    // Name
-    if (!paramFound && currentParam.startsWith('name')) {
-      paramFound = true;
-      colonPos = currentParam.indexOf(':');
-      if (colonPos !== -1) {
-        exactName = true;
-        nameToMatch = currentParam.substr(colonPos + 1);
-      } else { exactName = false; }
-    }
-
-    // Artist
-    if (!paramFound && currentParam.startsWith('artist')) {
-      paramFound = true;
-      colonPos = currentParam.indexOf(':');
-      if (colonPos !== -1) {
-        exactArtist = true;
-        artistToMatch = currentParam.substr(colonPos + 1);
-      } else { exactArtist = false; }
-    }
-
-    // BPM
-    if (!paramFound && currentParam.startsWith('bpm')) {
-      paramFound = true;
-      colonPos = currentParam.indexOf(':');
-      if (colonPos !== -1) {
-        if (currentParam[colonPos + 1] !== '~') { exactBpm = true; } else { exactBpm = false; }
-        bpmToMatch = currentParam.substr(colonPos + (exactBpm ? 1 : 2));
-      } else { exactBpm = false; }
-    }
-
-    // Type
-    if (!paramFound && currentParam.startsWith('type')) {
-      paramFound = true;
-      colonPos = currentParam.indexOf(':');
-      if (colonPos !== -1) {
-        exactType = true;
-        typeToMatch = currentParam.substr(colonPos + 1);
-      } else { exactType = false; }
-    }
-
-    // Single
-    if (!paramFound && currentParam.startsWith('single')) {
-      paramFound = true;
-      colonPos = currentParam.indexOf(':');
-      if (colonPos !== -1) {
-        if (currentParam[colonPos + 1] !== '~') { exactSingle = true; } else { exactSingle = false; }
-        singleToMatch = parseInt(currentParam.substr(colonPos + (exactSingle ? 1 : 2)), 10);
-      } else { exactSingle = false; }
-    }
-
-    // Double
-    if (!paramFound && currentParam.startsWith('double')) {
-      paramFound = true;
-      colonPos = currentParam.indexOf(':');
-      if (colonPos !== -1) {
-        if (currentParam[colonPos + 1] !== '~') { exactDouble = true; } else { exactDouble = false; }
-        doubleToMatch = parseInt(currentParam.substr(colonPos + (exactDouble ? 1 : 2)), 10);
-      } else { exactDouble = false; }
-    }
-
-    // Single Performance
-    if (!paramFound && currentParam.startsWith('sperformance')) {
-      paramFound = true;
-      colonPos = currentParam.indexOf(':');
-      if (colonPos !== -1) {
-        if (currentParam[colonPos + 1] !== '~') { exactSingleP = true; } else { exactSingleP = false; }
-        sPerformanceToMatch = parseInt(currentParam.substr(colonPos + (exactSingleP ? 1 : 2)), 10);
-      } else { exactSingleP = false; }
-    }
-
-    // Double Performance
-    if (!paramFound && currentParam.startsWith('dperformance')) {
-      paramFound = true;
-      colonPos = currentParam.indexOf(':');
-      if (colonPos !== -1) {
-        if (currentParam[colonPos + 1] !== '~') { exactDoubleP = true; } else { exactDoubleP = false; }
-        dPerformanceToMatch = parseInt(currentParam.substr(colonPos + (exactDoubleP ? 1 : 2)), 10);
-      } else { exactDoubleP = false; }
-    }
-
-    // Co-op
-    if (!paramFound && currentParam.startsWith('coop')) {
-      paramFound = true;
-      colonPos = currentParam.indexOf(':');
-      if (colonPos !== -1) {
-        if (currentParam[colonPos + 1] !== '~') { exactCoop = true; } else { exactCoop = false; }
-        coopToMatch = parseInt(currentParam.substr(colonPos + (exactCoop ? 1 : 2)), 10);
-      } else { exactCoop = false; }
-    }
-
-    // Series
-    if (!paramFound && currentParam.startsWith('series')) {
-      paramFound = true;
-      colonPos = currentParam.indexOf(':');
-      if (colonPos !== -1) {
-        exactSeries = true;
-        seriesToMatch = currentParam.substr(colonPos + 1);
-      } else { exactSeries = false; }
-    }
-
-    // Channel
-    if (!paramFound && currentParam.startsWith('channel')) {
-      paramFound = true;
-      colonPos = currentParam.indexOf(':');
-      if (colonPos !== -1) {
-        exactChannel = true;
-        channelToMatch = currentParam.substr(colonPos + 1);
-      } else { exactChannel = false; }
-    }
-
-    // Region
-    if (!paramFound && currentParam.startsWith('exclusive')) {
-      paramFound = true;
-      colonPos = currentParam.indexOf(':');
-      if (colonPos !== -1) {
-        exactExclusivity = true;
-        exclusivityToMatch = currentParam.substr(colonPos + 1);
-      } else { exactExclusivity = false; }
-    }
-  }
+  // Parsing the parameter string to a JSON object
+  const searchJSON = database.SearchTextToJSON(searchParams, paramString);
 
   // ==================================
   // ===== GETTING MATCHING SONGS =====
   // ==================================
   let criteriaMet = true;
+  let test = false;
+  let range = false;
   songMatches = prime2Songs.filter((song) => {
     // Resetting the Criteria Met boolean
     criteriaMet = true;
 
     // Name
-    if (exactName !== undefined) {
-      criteriaMet = criteriaMet && database.SongStringCompare(song, 'name', exactName, nameToMatch);
+    if (searchJSON.name) {
+      test = database.SongStringCompare2(song, 'name', searchJSON.nameTerm);
+      criteriaMet = criteriaMet && test;
     }
 
     // Artist
-    if (exactArtist !== undefined) {
-      criteriaMet = criteriaMet && database.SongStringCompare(song, 'artist', exactArtist, artistToMatch);
+    if (searchJSON.artist) {
+      test = database.SongStringCompare2(song, 'artist', searchJSON.artistTerm);
+      criteriaMet = criteriaMet && test;
     }
 
     // BPM
-    if (exactBpm !== undefined) {
-      const matchBpm = parseInt(bpmToMatch.replace(/[^\d]/g, ''), 10);
+    if (searchJSON.bpm) {
       const songBpm = parseInt(song.bpm.replace(/[^\d]/g, ''), 10);
-      criteriaMet = criteriaMet && database.SongIntCompare({ bpm: songBpm }, 'bpm', exactBpm, matchBpm, 10);
+      range = searchJSON.bpmRange;
+      test = database.SongIntCompare2({ bpm: songBpm }, 'bpm', searchJSON.bpmTerm, (range ? 10 : 0));
+      criteriaMet = criteriaMet && test;
     }
 
     // Type
-    if (exactType !== undefined) {
-      criteriaMet = criteriaMet && database.SongStringCompare(song, 'type', exactType, typeToMatch);
+    if (searchJSON.type) {
+      test = database.SongStringCompare2(song, 'type', searchJSON.typeTerm);
+      criteriaMet = criteriaMet && test;
     }
 
     // Single
-    if (exactSingle !== undefined) {
+    if (searchJSON.single) {
       let cumulative = false;
+      range = searchJSON.singleRange;
       for (let num = 0; !cumulative && num < song.single.length; num++) {
-        cumulative = cumulative || database.SongIntCompare(song.single, num, exactSingle, singleToMatch, 1);
+        cumulative = cumulative || database.SongIntCompare2(song.single, num, searchJSON.singleTerm, (range ? 1 : 0));
       }
       criteriaMet = criteriaMet && cumulative;
     }
 
     // Double
-    if (exactDouble !== undefined) {
+    if (searchJSON.double) {
       let cumulative = false;
+      range = searchJSON.doubleRange;
       for (let num = 0; !cumulative && num < song.double.length; num++) {
-        cumulative = cumulative || database.SongIntCompare(song.double, num, exactDouble, doubleToMatch, 1);
+        cumulative = cumulative || database.SongIntCompare2(song.double, num, searchJSON.doubleTerm, (range ? 1 : 0));
       }
       criteriaMet = criteriaMet && cumulative;
     }
 
     // Single Performance
-    if (exactSingleP !== undefined) {
+    if (searchJSON.sperformance) {
       let cumulative = false;
+      range = searchJSON.sperformanceRange;
       for (let num = 0; !cumulative && num < song.sPerformance.length; num++) {
-        cumulative = cumulative || database.SongIntCompare(song.sPerformance, num, exactSingleP, sPerformanceToMatch, 1);
+        cumulative = cumulative || database.SongIntCompare2(song.sPerformance, num, searchJSON.sperformanceTerm, (range ? 1 : 0));
       }
       criteriaMet = criteriaMet && cumulative;
     }
 
     // Double Performance
-    if (exactDoubleP !== undefined) {
+    if (searchJSON.dperformance) {
       let cumulative = false;
+      range = searchJSON.dperformanceRange;
       for (let num = 0; !cumulative && num < song.dPerformance.length; num++) {
-        cumulative = cumulative || database.SongIntCompare(song.dPerformance, num, exactDoubleP, dPerformanceToMatch, 1);
+        cumulative = cumulative || database.SongIntCompare2(song.dPerformance, num, searchJSON.dperformanceTerm, 1);
       }
       criteriaMet = criteriaMet && cumulative;
     }
 
     // Co-op
-    if (exactCoop !== undefined) {
+    if (searchJSON.coop) {
       let cumulative = false;
+      range = searchJSON.coopRange;
       for (let num = 0; !cumulative && num < song.coop.length; num++) {
-        cumulative = cumulative || database.SongIntCompare(song.coop, num, exactCoop, coopToMatch, 1);
+        cumulative = cumulative || database.SongIntCompare2(song.coop, num, searchJSON.coopTerm, 1);
       }
       criteriaMet = criteriaMet && cumulative;
     }
 
     // Series
-    if (exactSeries !== undefined) {
-      criteriaMet = criteriaMet && database.SongStringCompare(song, 'series', exactSeries, seriesToMatch);
+    if (searchJSON.series) {
+      test = database.SongStringCompare2(song, 'series', searchJSON.seriesTerm);
+      criteriaMet = criteriaMet && test;
     }
 
     // Channel
-    if (exactChannel !== undefined) {
-      criteriaMet = criteriaMet && database.SongStringCompare(song, 'channel', exactChannel, channelToMatch);
+    if (searchJSON.channel) {
+      test = database.SongStringCompare2(song, 'channel', searchJSON.channelTerm);
+      criteriaMet = criteriaMet && test;
     }
 
     // Exclusive
-    if (exactExclusivity !== undefined) {
-      criteriaMet = criteriaMet && database.SongStringCompare(song, 'exclusivity', exactExclusivity, exclusivityToMatch);
+    if (searchJSON.exclusive) {
+      test = database.SongStringCompare2(song, 'exclusivity', searchJSON.exclusiveTerm);
+      criteriaMet = criteriaMet && test;
     }
 
     return criteriaMet;
@@ -370,40 +239,21 @@ function search(paramString) {
 }
 
 // help()
-function help() {
-  const str = `Proper Usage:\n\`\`\`<dps_cmd> ${identities[0]} [name:?] [artist:?] [type:?] `
-              + '[single] [double] [series:?] [channel:?]\n\n'
-              + '- [name:?]        = Song name contains \'?\' (no spaces)\n'
-              + '- [artist:?]      = Song artist name contains \'?\' (no spaces)\n'
-              + '- [type:?]        = \'?\' is the song\' type (Options: normal, remix, full, short)\n'
-              + '- [single]        = Song must have a Single chart (append \':#\' for exact difficulty, \':~#\' for range)\n'
-              + '- [double]        = Song must have a Double chart (append \':#\' for exact difficulty, \':~#\' for range)\n'
-              + '- [series:?]      = \'?\' is the in-game subseries label the song has been given (ex; nx, fiesta, prime, etc.)\n'
-              + '- [channel:?]     = \'?\' is the in-game channel the song resides in (ex; original, world, xross, etc.)\n'
-              + `\`\`\`(Issue \` <dps_cmd> ${identities[0]} help2 \` for all options)`;
-  return str;
+function helpShort() {
+  const exclusions = [
+    'bpm',
+    'version',
+    'sperformance',
+    'dperformance',
+    'coop',
+    'exclusive',
+  ];
+  return database.HelpFromSearchParams(searchParams, identities[0], exclusions);
 }
 
 // help2()
-function help2() {
-  const str = `Proper Usage:\n\`\`\`<dps_cmd> ${identities[0]} [name:?] [artist:?] [bpm:?] [type:?] `
-              + '[version:?] [single] [double] [sperformance] [dperformance] [coop] [series:?] '
-              + '[channel:?] [exclusive:?]\n\n'
-              + '- [name:?]        = Song name contains \'?\' (no spaces)\n'
-              + '- [artist:?]      = Song artist name contains \'?\' (no spaces)\n'
-              + '- [bpm:#]         = Song\'s BPM exactly matches \'#\' (prepend \'~\' for range of -/+ 10 BPM)\n'
-              + '- [type:?]        = \'?\' is the song\' type (Options: normal, remix, full, short)\n'
-              + '- [version:?]     = \'?\' is the update number when the song was added (ex; 1.00, 1.09, 2.02, etc.)\n'
-              + '- [single]        = Song must have a Single chart (append \':#\' for exact difficulty, \':~#\' for range)\n'
-              + '- [double]        = Song must have a Double chart (append \':#\' for exact difficulty, \':~#\' for range)\n'
-              + '- [sperformance]  = Song must have a Single Performance chart (append \':#\' for exact difficulty, \':~#\' for range)\n'
-              + '- [dperformance]  = Song must have a Double Performance chart (append \':#\' for exact difficulty, \':~#\' for range)\n'
-              + '- [coop]          = Song must have a Co-op chart (append \':#\' for number of players, \':~#\' for range)\n'
-              + '- [series:?]      = \'?\' is the in-game subseries label the song has been given (ex; nx, fiesta, prime, etc.)\n'
-              + '- [channel:?]     = \'?\' is the in-game channel the song resides in (ex; original, world, xross, etc.)\n'
-              + '- [exclusive:?]   = \'?\' is the region the song is exclusive to (Options: philippines, latin)\n'
-              + '```';
-  return str;
+function helpFull() {
+  return database.HelpFromSearchParams(searchParams, identities[0]);
 }
 
 // Setting up the exports
@@ -415,6 +265,6 @@ module.exports = {
   Songs: prime2Songs,
   Format: format,
   Search: search,
-  Help: help,
-  Help2: help2,
+  Help: helpShort,
+  Help2: helpFull,
 };

@@ -169,6 +169,7 @@ function search(paramString) {
     // Name
     if (searchJSON.name) {
       test = database.SongStringCompare2(song, 'name', searchJSON.nameTerm);
+      test = test || (song.remywiki.toLowerCase().indexOf(searchJSON.nameTerm) > 21);
       criteriaMet = criteriaMet && test;
     }
 
