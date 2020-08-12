@@ -22,6 +22,49 @@ let identityDictionary = [];
  * =================================
  */
 
+// parseStringFromCSV()
+function parseStringFromCSV(str) {
+  // Copying the passed-in string to another variable
+  let csvStr = str;
+  
+  // Defining the parsed string array + counter variable
+  let parsedStr = [];
+  let counter = 0;
+  
+  // WHILE the copied CSV string still has data...
+  while (csvStr.length > 0) {
+    // IF the CSV string starts with a quote, find the next instance of a quote w/ a comma right after it
+    if (csvStr.startsWith('"')) {
+      nextCommaPos = csvStr.indexOf('",');
+      // IF the next comma was found, parse the value and do another loop
+      if (nextCommaPos > -1) {
+        parsedStr[counter] = csvStr.substr(1, nextCommaPos - 1);
+        csvStr = csvStr.substr(nextCommaPos + 2);
+      } else {
+        // ELSE... (the next comma was NOT found, ergo just get until the end of the string)
+        parsedStr[counter] = csvStr.substr(1, csvStr.length - 2);
+        csvStr = 0;
+      }
+    } else {
+      // ELSE... (CSV string does NOT start with a quote, so find the next comma)
+      nextCommaPos = csvStr.indexOf(',');
+      // IF the next comma was found, parse the value and do another loop
+      if (nextCommaPos > -1) {
+        parsedStr[counter] = csvStr.substr(0, nextCommaPos);
+        csvStr = csvStr.substr(nextCommaPos + 1);
+      } else {
+        // ELSE... (the next comma was NOT found, ergo just get until the end of the string)
+        parsedStr[counter] = csvStr;
+        csvStr = 0;
+      }
+    }
+    counter++;
+  }
+  
+  // Returning the parsed array
+  return parsedStr;
+}
+
 // defineSearchParam()
 function defineSearchParam(desc, tp = undefined, apnd = '') {
   return {
@@ -108,10 +151,16 @@ function songStringCompare(song, property, matchPhrase, equal = false) {
     if (matchPhrase.length > 0) {
       // IF we're looking for an equal match, check if the match phrase is the property
       if (equal) {
-        result = (song[property].toLowerCase() === matchPhrase);
+        if (Array.isArray(song[property])) {
+          for (let num = 0; !result && num < song[property].length; num++) {
+            result = (song[property][num].toLowerCase() === matchPhrase);
+          }
+        } else {
+          result = (song[property].toLowerCase() === matchPhrase);
+        }
       } else {
         // ELSE just check if the match phrase exists in the property
-        result = (song[property].toLowerCase().indexOf(matchPhrase) > -1);
+        result = (song[property].toString().toLowerCase().indexOf(matchPhrase) > -1);
       }
     } else {
       // ELSE just check if the property is defined
@@ -132,7 +181,13 @@ function songIntCompare(song, property, matchNum, range = 0) {
   if (song !== undefined) {
     // IF the match number is defined, return return whether the property is within the range
     if (!Number.isNaN(matchNum)) {
-      result = (song[property] >= matchNum - range && song[property] <= matchNum + range);
+      if (Array.isArray(song[property])) {
+        for (let num = 0; !result && num < song[property].length; num++) {
+          result = (matchNum - range <= song[property][num] && song[property][num] <= matchNum + range);
+        }
+      } else {
+        result = (matchNum - range <= song[property] && song[property] <= matchNum + range);
+      }
     } else {
       // ELSE check if the property is defined
       result = !Number.isNaN(song[property]);
@@ -270,6 +325,7 @@ module.exports = {
   IdentityToModuleName: identityToModName,
   SupportedGames: supportedGames,
   Modules: loadedModules,
+  ParseStringFromCSV: parseStringFromCSV,
   DefineSearchParam: defineSearchParam,
   SearchTextToJSON: searchTextToJSON,
   SongStringCompare2: songStringCompare,

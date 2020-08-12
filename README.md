@@ -9,7 +9,6 @@ If you are a web developer with a decent understanding of Node, you already know
 # Roadmap
 
 1. Add more commands
-    - Song info (search database -> ask user for clarification -> display song properties)
     - Daily setlist (Create list of randomly-chosen songs and post it every X hours)
     - Auto-Twitter posting (looks for non-retweet posts from rhythm game dev accounts + posts them to specified channel)
     - More Challenge sub-commands (for actually relevant rhythm games)
@@ -30,10 +29,3 @@ If you are a web developer with a decent understanding of Node, you already know
 5. Run the command `npm start`
 
 Just invite the bot to the desired Discord server and the bot is fully operational.
-
-# Development Instructions
-
-## Cloning (for the first time)
-
-- Please run `git clone --recursive <project url>` instead of the standard `git clone <project_url>`.
-    - This is because DPS-kun relies on the Rhythm Game CSVs repository: https://github.com/Michael-A-Berger/Rhythm-Game-CSVs
