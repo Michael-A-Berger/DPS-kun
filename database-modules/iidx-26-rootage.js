@@ -59,7 +59,7 @@ searchParams.dph = database.DefineSearchParam(searchParams.dpn.description.repla
 searchParams.dpa = database.DefineSearchParam(searchParams.dpn.description.replace('Normal', 'Another'), 1);
 searchParams.dpl = database.DefineSearchParam(searchParams.dpn.description.replace('Normal', 'Leggendaria'), 1);
 searchParams.firststyle = database.DefineSearchParam('The IIDX style the song first appeared in (Options: 1 -> 26, substream)', '', ':?');
-searchParams.notecount = database.DefineSearchParam('Note count on one of the song\'s charts must match \'#\' (prepend \'~\' for range of -/+ 20)', 1, ':#');
+searchParams.notecount = database.DefineSearchParam('Note count on one of the song\'s charts must match \'#\' (prepend \'~\' for range of -/+ 25)', 1, ':#');
 searchParams.cn = database.DefineSearchParam('Only returns songs with charts that have Charge Notes', '');
 searchParams.bs = database.DefineSearchParam('Only returns songs with charts that have Backspin Scratches', '');
 searchParams.hellcn = database.DefineSearchParam('Only returns songs with charts that have Hell Charge Notes', '');
@@ -81,8 +81,6 @@ function loadSongs() {
 
   // Defining some preliminary variables
   let songString = [];
-  const counter = 0;
-  const nextCommaPos = -1;
 
   // Defining the song properties array (+ num parsing start & stop indices)
   const songProps = [
@@ -185,19 +183,28 @@ function loadSongs() {
 
 // formatArrayForString()
 function formatArrayForString(propArray, limit = 999) {
-  // Defining the print string
+  // Defining the print string + early definition boolean
   let printStr = '';
   
-  // Formatting the print string
-  for (let num = 0; num < propArray.length && num < limit; num++) {
-    if (num === propArray.length - 1) printStr += '& ';
-    printStr += `**${propArray[num]}**`;
-    if (num < propArray.length - 1) printStr += ', ';
+  // IF the property array is an actual array, create the formatted array string
+  if (typeof propArray !== 'string' && propArray.length > 1) {
+    for (let num = 0; num < propArray.length && num < limit; num++) {
+      if (num === propArray.length - 1) printStr += ' and ';
+      printStr += `**${propArray[num]}**`;
+      if (num < propArray.length - 2) printStr += ', ';
+    }
+    if (limit < propArray.length) {
+      printStr += `and ${propArray.length - limit} others`;
+    }
+  } else {
+    // ELSE... (the property array is NOT an actual array and is just a string)
+    if (typeof propArray === 'string') {
+      printStr = `**${propArray}**`;
+    } else {
+      printStr = `**${propArray[0]}**`;
+    }
   }
-  if (limit < propArray.length) {
-    printStr += `& ${propArray.length - limit} others`;
-  }
-  
+
   // Returning the print string
   return printStr;
 }
@@ -206,23 +213,26 @@ function formatArrayForString(propArray, limit = 999) {
 function format(song) {
   // Formatting the song
   let songStr = `${header}\t**${song.name}**\t${database.ReverseEmoji(header)}`;
-  
+
   // Deciding whether to add the transliteral name to the song string
   const formattedName = song.name.toLowerCase();
   const formattedTrans = song.transname.toLowerCase();
   if (formattedName.indexOf(formattedTrans) === -1 && formattedName.length !== formattedTrans.length) {
     songStr += `\n(lit. **${song.transname}**)`;
   }
-  
+
   // Generic song details, #1
   songStr += `\n- Artist: **${song.artist}**`;
+  songStr += `\n- Composition: ${formatArrayForString(song.composition)}`;
+  songStr += `\n- Arrangement: ${formatArrayForString(song.arrangement)}`;
   songStr += `\n- Genre: **${song.genre}**`;
-  songStr += `\n- BPM: **${song.bpm}**`;
+  songStr += `\n- BPM: ${formatArrayForString(song.bpm)}`;
+  songStr += `\n- Length: ${formatArrayForString(song.length)}`;
   songStr += '\n- Charts:';
-  
+
   // Difficulty - Beginner
   if (!Number.isNaN(song.beginnerrating)) {
-    songStr += `\n\t\t**Beginner (${song.beginnerrating})** [`;
+    songStr += `\n\t\t**Beginner (${song.beginnerrating})** - [`;
     songStr += `${song.beginnernotecount} Total Notes`;
     if (!Number.isNaN(song.beginnercn)) {
       songStr += ` - ${song.beginnercn} Charge Notes`;
@@ -231,7 +241,7 @@ function format(song) {
   }
   // Difficulty - Single Normal
   if (!Number.isNaN(song.spnrating)) {
-    songStr += `\n\t\t**Single Normal (${song.spnrating})** [`;
+    songStr += `\n\t\t**Single Normal (${song.spnrating})** - [`;
     songStr += `${song.spnnotecount} Total Notes`;
     if (!Number.isNaN(song.spncn)) {
       songStr += ` - ${song.spncn} Charge Notes`;
@@ -249,7 +259,7 @@ function format(song) {
   }
   // Difficulty - Sinle Hyper
   if (!Number.isNaN(song.sphrating)) {
-    songStr += `\n\t\t**Single Hyper (${song.sphrating})** [`;
+    songStr += `\n\t\t**Single Hyper (${song.sphrating})** - [`;
     songStr += `${song.sphnotecount} Total Notes`;
     if (!Number.isNaN(song.sphcn)) {
       songStr += ` - ${song.sphcn} Charge Notes`;
@@ -267,7 +277,7 @@ function format(song) {
   }
   // Difficulty - Single Another
   if (!Number.isNaN(song.sparating)) {
-    songStr += `\n\t\t**Single Another (${song.sparating})** [`;
+    songStr += `\n\t\t**Single Another (${song.sparating})** - [`;
     songStr += `${song.spanotecount} Total Notes`;
     if (!Number.isNaN(song.spacn)) {
       songStr += ` - ${song.spacn} Charge Notes`;
@@ -281,11 +291,11 @@ function format(song) {
     if (!Number.isNaN(song.spahellbs)) {
       songStr += ` - ${song.spahellbs} Hell Backspin Scratches`;
     }
-    songStr += ']'
+    songStr += ']';
   }
   // Difficulty - Single Leggendaria
   if (!Number.isNaN(song.splrating)) {
-    songStr += `\n\t\t**Single Leggendaria (${song.splrating})** [`;
+    songStr += `\n\t\t**Single Leggendaria (${song.splrating})** - [`;
     songStr += `${song.splnotecount} Total Notes`;
     if (!Number.isNaN(song.splcn)) {
       songStr += ` - ${song.splcn} Charge Notes`;
@@ -303,7 +313,7 @@ function format(song) {
   }
   // Difficulty - Double Normal
   if (!Number.isNaN(song.dpnrating)) {
-    songStr += `\n\t\t**Double Normal (${song.dpnrating})** [`;
+    songStr += `\n\t\t**Double Normal (${song.dpnrating})** - [`;
     songStr += `${song.dpnnotecount} Total Notes`;
     if (!Number.isNaN(song.dpncn)) {
       songStr += ` - ${song.dpncn} Charge Notes`;
@@ -321,7 +331,7 @@ function format(song) {
   }
   // Difficulty - Double Hyper
   if (!Number.isNaN(song.dphrating)) {
-    songStr += `\n\t\t**Double Hyper (${song.dphrating})** [`;
+    songStr += `\n\t\t**Double Hyper (${song.dphrating})** - [`;
     songStr += `${song.dphnotecount} Total Notes`;
     if (!Number.isNaN(song.dphcn)) {
       songStr += ` - ${song.dphcn} Charge Notes`;
@@ -339,7 +349,7 @@ function format(song) {
   }
   // Difficulty - Double Another
   if (!Number.isNaN(song.dparating)) {
-    songStr += `\n\t\t**Double Another (${song.dparating})** [`;
+    songStr += `\n\t\t**Double Another (${song.dparating})** - [`;
     songStr += `${song.dpanotecount} Total Notes`;
     if (!Number.isNaN(song.dpacn)) {
       songStr += ` - ${song.dpacn} Charge Notes`;
@@ -357,7 +367,7 @@ function format(song) {
   }
   // Difficulty - Double Leggendaria
   if (!Number.isNaN(song.dplrating)) {
-    songStr += `\n\t\t**Double Leggendaria (${song.dplrating})** [`;
+    songStr += `\n\t\t**Double Leggendaria (${song.dplrating})** - [`;
     songStr += `${song.dplnotecount} Total Notes`;
     if (!Number.isNaN(song.dplcn)) {
       songStr += ` - ${song.dplcn} Charge Notes`;
@@ -373,12 +383,13 @@ function format(song) {
     }
     songStr += ']';
   }
-  
+
   // Generic Song Details, #2
   songStr += `\n- First BEMANI Game: ${formatArrayForString(song.firstgame, 3)}`;
   if (song.othergames.length > 0) {
     songStr += `\n- Other BEMANI Game Appearances: ${formatArrayForString(song.othergames, 3)}`;
   }
+  songStr += `\n- Video Jockey: ${formatArrayForString(song.vj)}`;
   songStr += `\n- RemyWiki page: ${song.remywiki}`;
 
   // Returning the formatted song string
@@ -416,13 +427,13 @@ function search(paramString) {
       test = database.SongStringCompare2(song, 'artist', searchJSON.artistTerm);
       criteriaMet = criteriaMet && test;
     }
-    
+
     // Composition
     if (searchJSON.composition) {
       test = database.SongStringCompare2(song, 'composition', searchJSON.compositionTerm);
       criteriaMet = criteriaMet && test;
     }
-    
+
     // Arrangement
     if (searchJSON.arrangement) {
       test = database.SongStringCompare2(song, 'arrangement', searchJSON.arrangementTerm);
@@ -448,7 +459,7 @@ function search(paramString) {
         songBPM = parseInt(song.bpm.replace(/[^\d]/g, ''), 10);
       }
       range = searchJSON.bpmRange;
-      test = database.SongIntCompare2({ bpm: songBpm }, 'bpm', searchJSON.bpmTerm, (range ? 10 : 0));
+      test = database.SongIntCompare2({ bpm: songBPM }, 'bpm', searchJSON.bpmTerm, (range ? 10 : 0));
       criteriaMet = criteriaMet && test;
     }
 
@@ -520,40 +531,96 @@ function search(paramString) {
       // Attempting to parse the term to an integer
       let styleNum = parseInt(searchJSON.firststyleTerm, 10);
       if (Number.isNaN(styleNum)) styleNum = 0;
-      styleNum = Math.min(Math.max(styleNum, iidxStyles.length - 1), 0);
+      styleNum = Math.max(Math.min(styleNum, iidxStyles.length - 1), 0);
       test = database.SongStringCompare2(song, 'firstgame', iidxStyles[styleNum].toLowerCase(), true);
       test = test || database.SongStringCompare2(song, 'othergames', iidxStyles[styleNum].toLowerCase(), true);
       criteriaMet = criteriaMet && test;
     }
-    
+
     // Note Count
     if (searchJSON.notecount) {
-      console.log(`ERROR: 'notecount' search property not defined!`);
+      // Getting the notecount term as a number + Defining whether there is a range
+      let noteCount = parseInt(searchJSON.notecountTerm, 10);
+      range = searchJSON.notecountRange;
+      // Determining if every note count should be checked
+      let checkEvery = true;
+      checkEvery = checkEvery && !searchJSON.beginner;
+      checkEvery = checkEvery && !searchJSON.spn;
+      checkEvery = checkEvery && !searchJSON.sph;
+      checkEvery = checkEvery && !searchJSON.spa;
+      checkEvery = checkEvery && !searchJSON.spl;
+      checkEvery = checkEvery && !searchJSON.dpn;
+      checkEvery = checkEvery && !searchJSON.dph;
+      checkEvery = checkEvery && !searchJSON.dpa;
+      checkEvery = checkEvery && !searchJSON.dpl;
+      // Doing the checks for the note counts
+      test = false;
+      if (checkEvery || searchJSON.beginner) {
+        test = test ||  database.SongIntCompare2(song, 'beginnernotecount', noteCount, (range ? 25 : 0));
+      }
+      if (checkEvery || searchJSON.spn) {
+        test = test || database.SongIntCompare2(song, 'spnnotecount', noteCount, (range ? 25 : 0));
+      }
+      if (checkEvery || searchJSON.sph) {
+        test = test || database.SongIntCompare2(song, 'sphnotecount', noteCount, (range ? 25 : 0));
+      }
+      if (checkEvery || searchJSON.spa) {
+        test = test || database.SongIntCompare2(song, 'spanotecount', noteCount, (range ? 25 : 0));
+      }
+      if (checkEvery || searchJSON.spl) {
+        test = test || database.SongIntCompare2(song, 'splnotecount', noteCount, (range ? 25 : 0));
+      }
+      if (checkEvery || searchJSON.dpn) {
+        test = test || database.SongIntCompare2(song, 'dpnnotecount', noteCount, (range ? 25 : 0));
+      }
+      if (checkEvery || searchJSON.dph) {
+        test = test || database.SongIntCompare2(song, 'dphnotecount', noteCount, (range ? 25 : 0));
+      }
+      if (checkEvery || searchJSON.dpa) {
+        test = test || database.SongIntCompare2(song, 'dpanotecount', noteCount, (range ? 25 : 0));
+      }
+      if (checkEvery || searchJSON.dpl) {
+        test = test || database.SongIntCompare2(song, 'dplnotecount', noteCount, (range ? 25 : 0));
+      }
+      // Adding the cumulated tests to the criteria met boolean
+      criteriaMet = criteriaMet && test;
     }
-    
+
     // Charge Notes
     if (searchJSON.cn) {
-      console.log(`ERROR: 'cn' search property not defined!`);
+      // Determining if every chart should be checked
+      let checkEvery = true;
+      checkEvery = checkEvery && !searchJSON.beginner;
+      checkEvery = checkEvery && !searchJSON.spn;
+      checkEvery = checkEvery && !searchJSON.sph;
+      checkEvery = checkEvery && !searchJSON.spa;
+      checkEvery = checkEvery && !searchJSON.spl;
+      checkEvery = checkEvery && !searchJSON.dpn;
+      checkEvery = checkEvery && !searchJSON.dph;
+      checkEvery = checkEvery && !searchJSON.dpa;
+      checkEvery = checkEvery && !searchJSON.dpl;
+      // Doing the checks for Charge Notes
+      console.log('ERROR: \'cn\' search property not defined!');
     }
-    
+
     // Backspin Scratches
-    if (searchJSON.notecount) {
-      console.log(`ERROR: 'bs' search property not defined!`);
+    if (searchJSON.bs) {
+      console.log('ERROR: \'bs\' search property not defined!');
     }
-    
+
     // Hell Charge Notes
     if (searchJSON.hellcn) {
-      console.log(`ERROR: 'hellcn' search property not defined!`);
+      console.log('ERROR: \'hellcn\' search property not defined!');
     }
-    
+
     // Hell Backspin Scratches
-    if (searchJSON.notecount) {
-      console.log(`ERROR: 'hellbs' search property not defined!`);
+    if (searchJSON.hellbs) {
+      console.log('ERROR: \'hellbs\' search property not defined!');
     }
-    
+
     // VJ
     if (searchJSON.vj) {
-      test = database.SongStringCompare2(song, 'vj', searhJSON.vjTerm);
+      test = database.SongStringCompare2(song, 'vj', searchJSON.vjTerm);
       criteriaMet = criteriaMet && test;
     }
 
@@ -571,7 +638,6 @@ function helpShort() {
     'arrangement',
     'bpm',
     'genre',
-    'beginner',
     'spl',
     'dpl',
     'notecount',

@@ -26,11 +26,11 @@ let identityDictionary = [];
 function parseStringFromCSV(str) {
   // Copying the passed-in string to another variable
   let csvStr = str;
-  
+
   // Defining the parsed string array + counter variable
-  let parsedStr = [];
+  const parsedStr = [];
   let counter = 0;
-  
+
   // WHILE the copied CSV string still has data...
   while (csvStr.length > 0) {
     // IF the CSV string starts with a quote, find the next instance of a quote w/ a comma right after it
@@ -38,11 +38,11 @@ function parseStringFromCSV(str) {
       nextCommaPos = csvStr.indexOf('",');
       // IF the next comma was found, parse the value and do another loop
       if (nextCommaPos > -1) {
-        parsedStr[counter] = csvStr.substr(1, nextCommaPos - 1);
+        parsedStr[counter] = csvStr.substr(1, nextCommaPos - 1).replace(/\"\"+/g, '"');
         csvStr = csvStr.substr(nextCommaPos + 2);
       } else {
         // ELSE... (the next comma was NOT found, ergo just get until the end of the string)
-        parsedStr[counter] = csvStr.substr(1, csvStr.length - 2);
+        parsedStr[counter] = csvStr.substr(1, csvStr.length - 2).replace(/\"\"+/g, '"');
         csvStr = 0;
       }
     } else {
@@ -60,7 +60,7 @@ function parseStringFromCSV(str) {
     }
     counter++;
   }
-  
+
   // Returning the parsed array
   return parsedStr;
 }
@@ -243,7 +243,7 @@ function helpFromSearchParams(searchParams, gameId, exceptions = []) {
 // reverseEmojis()
 function reverseEmoji(emojiStr) {
   let result = '';
-  let emojies =  emojiStr.split(':\:');
+  const emojies = emojiStr.split(':\:');
   for (let num = 0; num < emojies.length; num++) {
     if (num !== 0) emojies[num] = `\:${emojies[num]}`;
     if (num !== emojies.length - 1) emojies[num] = `${emojies[num]}:`;

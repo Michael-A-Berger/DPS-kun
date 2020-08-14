@@ -133,7 +133,6 @@ function searchDatabase(message, chosenMod) {
               + 'to see the list of valid search options for this game.';
     message.channel.send(str);
   }
-  
 }
 
 // search()
