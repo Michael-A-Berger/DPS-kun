@@ -58,12 +58,12 @@ searchParams.dpn = database.DefineSearchParam(searchParams.spn.description.repla
 searchParams.dph = database.DefineSearchParam(searchParams.dpn.description.replace('Normal', 'Hyper'), 1);
 searchParams.dpa = database.DefineSearchParam(searchParams.dpn.description.replace('Normal', 'Another'), 1);
 searchParams.dpl = database.DefineSearchParam(searchParams.dpn.description.replace('Normal', 'Leggendaria'), 1);
-searchParams.firststyle = database.DefineSearchParam('The IIDX style the song first appeared in (Options: 1 -> 26, substream)', '', ':?');
 searchParams.notecount = database.DefineSearchParam('Note count on one of the song\'s charts must match \'#\' (prepend \'~\' for range of -/+ 25)', 1, ':#');
 searchParams.cn = database.DefineSearchParam('Only returns songs with charts that have Charge Notes', '');
 searchParams.bs = database.DefineSearchParam('Only returns songs with charts that have Backspin Scratches', '');
 searchParams.hellcn = database.DefineSearchParam('Only returns songs with charts that have Hell Charge Notes', '');
 searchParams.hellbs = database.DefineSearchParam('Only returns songs with charts that have Hell Backspin Scratches', '');
+searchParams.firststyle = database.DefineSearchParam('The IIDX style the song first appeared in (Options: 1 -> 26, substream)', '', ':?');
 searchParams.vj = database.DefineSearchParam('Song VJ artist info contains \'?\' (no spaces)', '', ':?');
 
 // Newline Variable
@@ -525,34 +525,24 @@ function search(paramString) {
       test = database.SongIntCompare2(song, 'dplrating', searchJSON.dplTerm, (range ? 1 : 0));
       criteriaMet = criteriaMet && test;
     }
-
-    // First Style
-    if (searchJSON.firststyle) {
-      // Attempting to parse the term to an integer
-      let styleNum = parseInt(searchJSON.firststyleTerm, 10);
-      if (Number.isNaN(styleNum)) styleNum = 0;
-      styleNum = Math.max(Math.min(styleNum, iidxStyles.length - 1), 0);
-      test = database.SongStringCompare2(song, 'firstgame', iidxStyles[styleNum].toLowerCase(), true);
-      test = test || database.SongStringCompare2(song, 'othergames', iidxStyles[styleNum].toLowerCase(), true);
-      criteriaMet = criteriaMet && test;
-    }
+    
+    // DETERMINING IF EVERY CHART SHOULD BE CHECKED (for Note Count + Note Type checks)
+    let checkEvery = true;
+    checkEvery = checkEvery && !searchJSON.beginner;
+    checkEvery = checkEvery && !searchJSON.spn;
+    checkEvery = checkEvery && !searchJSON.sph;
+    checkEvery = checkEvery && !searchJSON.spa;
+    checkEvery = checkEvery && !searchJSON.spl;
+    checkEvery = checkEvery && !searchJSON.dpn;
+    checkEvery = checkEvery && !searchJSON.dph;
+    checkEvery = checkEvery && !searchJSON.dpa;
+    checkEvery = checkEvery && !searchJSON.dpl;
 
     // Note Count
     if (searchJSON.notecount) {
       // Getting the notecount term as a number + Defining whether there is a range
       let noteCount = parseInt(searchJSON.notecountTerm, 10);
       range = searchJSON.notecountRange;
-      // Determining if every note count should be checked
-      let checkEvery = true;
-      checkEvery = checkEvery && !searchJSON.beginner;
-      checkEvery = checkEvery && !searchJSON.spn;
-      checkEvery = checkEvery && !searchJSON.sph;
-      checkEvery = checkEvery && !searchJSON.spa;
-      checkEvery = checkEvery && !searchJSON.spl;
-      checkEvery = checkEvery && !searchJSON.dpn;
-      checkEvery = checkEvery && !searchJSON.dph;
-      checkEvery = checkEvery && !searchJSON.dpa;
-      checkEvery = checkEvery && !searchJSON.dpl;
       // Doing the checks for the note counts
       test = false;
       if (checkEvery || searchJSON.beginner) {
@@ -588,34 +578,136 @@ function search(paramString) {
 
     // Charge Notes
     if (searchJSON.cn) {
-      // Determining if every chart should be checked
-      let checkEvery = true;
-      checkEvery = checkEvery && !searchJSON.beginner;
-      checkEvery = checkEvery && !searchJSON.spn;
-      checkEvery = checkEvery && !searchJSON.sph;
-      checkEvery = checkEvery && !searchJSON.spa;
-      checkEvery = checkEvery && !searchJSON.spl;
-      checkEvery = checkEvery && !searchJSON.dpn;
-      checkEvery = checkEvery && !searchJSON.dph;
-      checkEvery = checkEvery && !searchJSON.dpa;
-      checkEvery = checkEvery && !searchJSON.dpl;
-      // Doing the checks for Charge Notes
-      console.log('ERROR: \'cn\' search property not defined!');
+      test = false;
+      if (checkEvery || searchJSON.beginner) {
+        test = test || (!Number.isNaN(song.beginnercn) && song.beginnercn > 0);
+      }
+      if (checkEvery || searchJSON.spn) {
+        test = test || (!Number.isNaN(song.spncn) && song.spncn > 0);
+      }
+      if (checkEvery || searchJSON.sph) {
+        test = test || (!Number.isNaN(song.sphcn) && song.sphcn > 0);
+      }
+      if (checkEvery || searchJSON.spa) {
+        test = test || (!Number.isNaN(song.spacn) && song.spacn > 0);
+      }
+      if (checkEvery || searchJSON.spl) {
+        test = test || (!Number.isNaN(song.splcn) && song.splcn > 0);
+      }
+      if (checkEvery || searchJSON.dpn) {
+        test = test || (!Number.isNaN(song.dpncn) && song.dpncn > 0);
+      }
+      if (checkEvery || searchJSON.dph) {
+        test = test || (!Number.isNaN(song.dphcn) && song.dphcn > 0);
+      }
+      if (checkEvery || searchJSON.dpa) {
+        test = test || (!Number.isNaN(song.dpacn) && song.dpacn > 0);
+      }
+      if (checkEvery || searchJSON.dpl) {
+        test = test || (!Number.isNaN(song.dplcn) && song.dplcn > 0);
+      }
+      criteriaMet = criteriaMet && test;
     }
 
     // Backspin Scratches
     if (searchJSON.bs) {
-      console.log('ERROR: \'bs\' search property not defined!');
+      test = false;
+      if (checkEvery || searchJSON.spn) {
+        test = test || (!Number.isNaN(song.spnbs) && song.spnbs > 0);
+      }
+      if (checkEvery || searchJSON.sph) {
+        test = test || (!Number.isNaN(song.sphbs) && song.sphbs > 0);
+      }
+      if (checkEvery || searchJSON.spa) {
+        test = test || (!Number.isNaN(song.spabs) && song.spabs > 0);
+      }
+      if (checkEvery || searchJSON.spl) {
+        test = test || (!Number.isNaN(song.splbs) && song.splbs > 0);
+      }
+      if (checkEvery || searchJSON.dpn) {
+        test = test || (!Number.isNaN(song.dpnbs) && song.dpnbs > 0);
+      }
+      if (checkEvery || searchJSON.dph) {
+        test = test || (!Number.isNaN(song.dphbs) && song.dphbs > 0);
+      }
+      if (checkEvery || searchJSON.dpa) {
+        test = test || (!Number.isNaN(song.dpabs) && song.dpabs > 0);
+      }
+      if (checkEvery || searchJSON.dpl) {
+        test = test || (!Number.isNaN(song.dplbs) && song.dplbs > 0);
+      }
+      criteriaMet = criteriaMet && test;
     }
 
     // Hell Charge Notes
     if (searchJSON.hellcn) {
-      console.log('ERROR: \'hellcn\' search property not defined!');
+      test = false;
+      if (checkEvery || searchJSON.spn) {
+        test = test || (!Number.isNaN(song.spnhellcn) && song.spnhellcn > 0);
+      }
+      if (checkEvery || searchJSON.sph) {
+        test = test || (!Number.isNaN(song.sphhellcn) && song.sphhellcn > 0);
+      }
+      if (checkEvery || searchJSON.spa) {
+        test = test || (!Number.isNaN(song.spahellcn) && song.spahellcn > 0);
+      }
+      if (checkEvery || searchJSON.spl) {
+        test = test || (!Number.isNaN(song.splhellcn) && song.splhellcn > 0);
+      }
+      if (checkEvery || searchJSON.dpn) {
+        test = test || (!Number.isNaN(song.dpnhellcn) && song.dpnhellcn > 0);
+      }
+      if (checkEvery || searchJSON.dph) {
+        test = test || (!Number.isNaN(song.dphhellcn) && song.dphhellcn > 0);
+      }
+      if (checkEvery || searchJSON.dpa) {
+        test = test || (!Number.isNaN(song.dpahellcn) && song.dpahellcn > 0);
+      }
+      if (checkEvery || searchJSON.dpl) {
+        test = test || (!Number.isNaN(song.dplhellcn) && song.dplhellcn > 0);
+      }
+      criteriaMet = criteriaMet && test;
     }
 
     // Hell Backspin Scratches
     if (searchJSON.hellbs) {
-      console.log('ERROR: \'hellbs\' search property not defined!');
+      test = false;
+      if (checkEvery || searchJSON.spn) {
+        test = test || (!Number.isNaN(song.spnhellbs) && song.spnhellbs > 0);
+      }
+      if (checkEvery || searchJSON.sph) {
+        test = test || (!Number.isNaN(song.sphhellbs) && song.sphhellbs > 0);
+      }
+      if (checkEvery || searchJSON.spa) {
+        test = test || (!Number.isNaN(song.spahellbs) && song.spahellbs > 0);
+      }
+      if (checkEvery || searchJSON.spl) {
+        test = test || (!Number.isNaN(song.splhellbs) && song.splhellbs > 0);
+      }
+      if (checkEvery || searchJSON.dpn) {
+        test = test || (!Number.isNaN(song.dpnhellbs) && song.dpnhellbs > 0);
+      }
+      if (checkEvery || searchJSON.dph) {
+        test = test || (!Number.isNaN(song.dphhellbs) && song.dphhellbs > 0);
+      }
+      if (checkEvery || searchJSON.dpa) {
+        test = test || (!Number.isNaN(song.dpahellbs) && song.dpahellbs > 0);
+      }
+      if (checkEvery || searchJSON.dpl) {
+        test = test || (!Number.isNaN(song.dplhellbs) && song.dplhellbs > 0);
+      }
+      criteriaMet = criteriaMet && test;
+    }
+    
+    // First Style
+    if (searchJSON.firststyle) {
+      // Attempting to parse the term to an integer
+      let styleNum = parseInt(searchJSON.firststyleTerm, 10);
+      if (Number.isNaN(styleNum)) styleNum = 0;
+      styleNum = Math.max(Math.min(styleNum, iidxStyles.length - 1), 0);
+      test = database.SongStringCompare2(song, 'firstgame', iidxStyles[styleNum].toLowerCase(), true);
+      test = test || database.SongStringCompare2(song, 'othergames', iidxStyles[styleNum].toLowerCase(), true);
+      criteriaMet = criteriaMet && test;
     }
 
     // VJ
