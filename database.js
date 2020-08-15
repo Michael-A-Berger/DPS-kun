@@ -7,10 +7,15 @@ const moduleExports = [
   'ModuleName',
   'FullGameName',
   'CommandIdentities',
+  'Header',
   'Load',
   'Songs',
   'Format',
+  'SearchParams',
   'Search',
+  'ChartName',
+  'MiscProperties',
+  'SortCategory',
   'Help',
   'Help2',
 ];
@@ -27,9 +32,10 @@ function parseStringFromCSV(str) {
   // Copying the passed-in string to another variable
   let csvStr = str;
 
-  // Defining the parsed string array + counter variable
+  // Defining the parsed string array + counter variable + the next comma variable
   const parsedStr = [];
   let counter = 0;
+  let nextCommaPos = 0;
 
   // WHILE the copied CSV string still has data...
   while (csvStr.length > 0) {

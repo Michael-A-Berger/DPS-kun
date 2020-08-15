@@ -289,6 +289,69 @@ function search(paramString) {
   return songMatches;
 }
 
+// chartName()
+function chartName(song, searchJSON) {
+  // Defining the chart name variable
+  let name = '';
+
+  // Defining the chart name based on search parameters (rarest -> most common)
+  if (name.length === 0 && searchJSON.dpka) {
+    name = `Double Black Another (${song.dpka})`;
+  }
+  if (name.length === 0 && searchJSON.dpa) {
+    name = `Double Another (${song.dpa})`;
+  }
+  if (name.length === 0 && searchJSON.dph) {
+    name = `Double Hyper (${song.dph})`;
+  }
+  if (name.length === 0 && searchJSON.dpn) {
+    name = `Double Normal (${song.dpn})`;
+  }
+  if (name.length === 0 && searchJSON.spka) {
+    name = `Single Black Another (${song.spka})`;
+  }
+  if (name.length === 0 && searchJSON.spa) {
+    name = `Single Another (${song.spa})`;
+  }
+  if (name.length === 0 && searchJSON.sph) {
+    name = `Single Hyper (${song.sph})`;
+  }
+  if (name.length === 0 && searchJSON.spn) {
+    name = `Single Normal (${song.spn})`;
+  }
+  if (name.length === 0 && searchJSON.beginner) {
+    name = `Beginner (${song.beginner})`;
+  }
+
+  // Returning the chart name
+  return name;
+}
+
+// miscProperties()
+function miscProperties(song, searchJSON) {
+  // Defining the properties object
+  const otherProps = {};
+
+  // Setting the property parameters based on the search field
+  if (searchJSON.genre) {
+    otherProps.Genre = song.genre;
+  }
+  if (searchJSON.bpm) {
+    otherProps.BPM = song.bpm;
+  }
+  if (searchJSON.origin) {
+    otherProps.Origin = song.origin;
+  }
+
+  // Returning the properties object
+  return otherProps;
+}
+
+// sortCategory()
+function sortCategory(song) {
+  return `(Disc: **${song.disc}** / Style: **${song.style}**)`;
+}
+
 // helpShort()
 function helpShort() {
   const exceptions = [
@@ -314,10 +377,15 @@ module.exports = {
   ModuleName: 'IIDX16CS',
   FullGameName: 'IIDX 16 EMPRESS + PREMIUM BEST',
   CommandIdentities: identities,
+  Header: header,
   Load: loadSongs,
   Songs: iidx16csSongs,
   Format: format,
+  SearchParams: searchParams,
   Search: search,
+  ChartName: chartName,
+  MiscProperties: miscProperties,
+  SortCategory: sortCategory,
   Help: helpShort,
   Help2: helpFull,
 };

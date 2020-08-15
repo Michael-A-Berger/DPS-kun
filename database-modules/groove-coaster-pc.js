@@ -152,6 +152,48 @@ function search(paramString) {
   return songMatches;
 }
 
+// chartName()
+function chartName(song, searchJSON) {
+  // Defining the chart name variable
+  let name = '';
+
+  // Setting the correct chart name to use (rarest -> most common)
+  if (name.length === 0 && searchJSON.extra) {
+    name = `Extra (${song.extra})`;
+  }
+  if (name.length === 0 && searchJSON.hard) {
+    name = `Hard (${song.hard})`;
+  }
+  if (name.length === 0 && searchJSON.normal) {
+    name = `Normal (${song.normal})`;
+  }
+  if (name.length === 0 && searchJSON.simple) {
+    name = `Simple (${song.simple})`;
+  }
+
+  // Returning the chart name
+  return name;
+}
+
+// miscProperties()
+function miscProperties(song, searchJSON) {
+  // Defining the properties object
+  const otherProps = {};
+
+  // Defining the properties object
+  if (searchJSON.bpm) {
+    otherProps.BPM = song.bpm;
+  }
+
+  // Returning the properties object
+  return otherProps;
+}
+
+// sortCategory()
+function sortCategory() {
+  return '';
+}
+
 // helpFull()
 function helpFull() {
   return database.HelpFromSearchParams(searchParams, identities[0]);
@@ -162,10 +204,15 @@ module.exports = {
   ModuleName: 'GrooveCoasterPC',
   FullGameName: 'Groove Coaster PC',
   CommandIdentities: identities,
+  Header: header,
   Load: loadSongs,
   Songs: gcpcSongs,
   Format: format,
+  SearchParams: searchParams,
   Search: search,
+  ChartName: chartName,
+  MiscProperties: miscProperties,
+  SortCategory: sortCategory,
   Help: helpFull,
   Help2: helpFull,
 };

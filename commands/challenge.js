@@ -185,367 +185,93 @@ function piuPrime2Gimmicks(gimmickNum) {
  * =======================================
  */
 
-// grooveCoasterPCChallenge()
-function grooveCoasterPcChallenge(message) {
-  // Defining the return string + the song + the valid songs
-  let returnString;
-  let chosenSong;
-  let validSongs = [];
-
-  // Getting the help message if requested, otherwise searching the songs
-  if (message.content.endsWith('help')) {
-    returnString = database.GrooveCoasterPC.Help();
-    returnString = returnString.replace(/<dps_cmd>/g, 'challenge');
-    returnString = returnString.substring(0, returnString.length - 3);
-    returnString = returnString.replace('[extra]\n\n', '[extra] [gimmick]\n\n');
-    returnString += '- [gimmick]   = Adds a gameplay modifier to the challenge\n```';
-  } else {
-    validSongs = database.GrooveCoasterPC.Search(message.content);
-  }
-
-  // IF the valid songs array is longer than one song, randomly choose a song
-  if (validSongs.length > 1) {
-    chosenSong = validSongs[Math.round(Math.random() * (validSongs.length - 1))];
-  } else if (validSongs.length === 1) { chosenSong = validSongs[0]; }
-
-  // IF a song was chosen, format the return string
-  if (chosenSong !== undefined) {
-    returnString = `\:headphones: <@${message.author.id}> 's CHALLENGE \:headphones:\nPlay`;
-    if (message.content.toLowerCase().indexOf(' extra') > -1) {
-      returnString += ` the **Extra (${chosenSong.extra})** chart of`;
-    } else if (message.content.toLowerCase().indexOf(' hard') > -1) {
-      returnString += ` the **Hard (${chosenSong.hard})** chart of`;
-    } else if (message.content.toLowerCase().indexOf(' normal') > -1) {
-      returnString += ` the **Normal (${chosenSong.normal})** chart of`;
-    } else if (message.content.toLowerCase().indexOf(' simple') > -1) {
-      returnString += ` the **Simple (${chosenSong.simple})** chart of`;
-    }
-    returnString += ` **${chosenSong.name}** (by ${chosenSong.artist})`;
-    if (message.content.toLowerCase().indexOf(' bpm') > -1) { returnString += ` (BPM: ${chosenSong.bpm})`; }
-    if (message.content.toLowerCase().indexOf(' gimmick') > -1) {
-      returnString += `\n(Gimmick: Use the **${(Math.random() * 2 > 1 ? 'NO INFO' : 'JUST')}** item.)`;
-    }
-  }
-
-  // IF the return string has not been defined yet... (no matches found)
-  if (returnString === undefined) {
-    returnString = '\:open_file_folder: No songs could be found with those restrictions! '
-                  + `Enter \`challenge ${gcpcIdentities[0]} help\` to see the list of valid `
-                  + 'challenge options for this game.';
-  }
-
-  // Returning the return string
-  return returnString;
+// help()
+function help() {
+  return 'Proper Usage:\n```challenge [game] [criteria?]\n\n'
+        + "- [game]       = The game to choose the chart from ('support' lists all supported games)\n"
+        + "- [criteria?]  = Restricts chosen song to certain criteria (issue 'challenge [game] "
+        + "help' to see options)```";
 }
 
-// museDashChallenge()
-function museDashChallenge(message) {
-  // Defining the return string + the song + the valid songs
-  let returnString;
+// formatChallenge()
+function formatChallenge(message, chosenMod) {
+  // Defining the chosen song + final string to print
   let chosenSong;
-  let validSongs = [];
+  let str = database.Modules[chosenMod].Header;
 
-  // Getting the help message if requested, otherwise searching the songs
-  if (message.content.endsWith('help')) {
-    returnString = database.MuseDash.Help();
-    returnString = returnString.replace(/<dps_cmd>/g, 'challenge');
+  // Defining the full first line of print string
+  str += `\t<@${message.author.id}> 's CHALLENGE\t`;
+  str += database.ReverseEmoji(database.Modules[chosenMod].Header);
+
+  // Getting the search object
+  const searchJSON = database.SearchTextToJSON(database.Modules[chosenMod].SearchParams, message.content);
+  const validSongs = database.Modules[chosenMod].Search(message.content);
+
+  // IF there is more than one search result...
+  if (validSongs.length > 0) {
+    // Choosing a random song
+    chosenSong = validSongs[Math.floor(Math.random() * validSongs.length)];
+
+    // Getting the display strings for the challenge
+    const chartName = database.Modules[chosenMod].ChartName(chosenSong, searchJSON);
+    const miscProps = database.Modules[chosenMod].MiscProperties(chosenSong, searchJSON);
+    const sortStr = database.Modules[chosenMod].SortCategory(chosenSong);
+
+    // Formatting the miscellaneous properties to a single string
+    let propStr = '';
+    let formattedPropName = '';
+    const miscKeys = Object.keys(miscProps);
+    for (let num = 0; num < miscKeys.length; num++) {
+      formattedPropName = miscKeys[num].replace(/([A-Z][a-z])/g, ' $&').trim();
+      propStr += ` (${formattedPropName}: ${miscProps[miscKeys[num]]})`;
+    }
+
+    // Formatting the rest of the message to send
+    str += '\nPlay ';
+    if (chartName.length > 0) {
+      str += `the **${chartName}** chart of `;
+    }
+    str += `**${chosenSong.name}** (by ${chosenSong.artist})`;
+    if (propStr.length > 0) str += propStr;
+    if (sortStr.length > 0) str += `\n${sortStr}`;
+
+    // Sending back the challenge message
+    message.channel.send(str);
   } else {
-    validSongs = database.MuseDash.Search(message.content);
+    // ELSE, send an error message
+    const noResults = '\:open_file_folder: No songs could be found with those restrictions! '
+                    + `Enter \`challenge ${database.Modules[chosenMod].CommandIdentities[0]} help\` `
+                    + 'to see the list of valid challenge options for this game.';
+    message.channel.send(noResults);
   }
-
-  // IF the valid songs array is longer than one song, randomly choose a song
-  if (validSongs.length > 1) {
-    chosenSong = validSongs[Math.round(Math.random() * (validSongs.length - 1))];
-  } else if (validSongs.length === 1) { chosenSong = validSongs[0]; }
-
-  // IF a song was chosen, format the return string
-  if (chosenSong !== undefined) {
-    returnString = `\:womans_hat: <@${message.author.id}> 's CHALLENGE \:womans_hat:\nPlay`;
-    if (message.content.toLowerCase().indexOf(' hidden') > -1) {
-      returnString += ` the **Hidden (${chosenSong.hidden})** chart of`;
-    } else if (message.content.toLowerCase().indexOf(' master') > -1) {
-      returnString += ` the **Master (${chosenSong.master})** chart of`;
-    } else if (message.content.toLowerCase().indexOf(' hard') > -1) {
-      returnString += ` the **Hard (${chosenSong.hard})** chart of`;
-    } else if (message.content.toLowerCase().indexOf(' easy') > -1) {
-      returnString += ` the **Easy (${chosenSong.easy})** chart of`;
-    }
-    returnString += ` **${chosenSong.name}** (by ${chosenSong.artist})`;
-    if (message.content.toLowerCase().indexOf(' bpm') > -1) { returnString += ` (BPM: ${chosenSong.bpm})`; }
-    returnString += `\n(Pack: ${chosenSong.pack})`;
-  }
-
-  // IF the return string has not been defined yet... (no matches found)
-  if (returnString === undefined) {
-    returnString = '\:open_file_folder: No songs could be found with those restrictions! '
-                  + `Enter \`challenge ${museDashIdentities[0]} help\` to see the list of `
-                  + 'valid challenge options for this game.';
-  }
-
-  // Returning the return string
-  return returnString;
-}
-
-// piuPrime2Challenge()
-function piuPrime2Challenge(message) {
-  // piuPrime2.load();
-  // return piuPrime2.get(message);
-
-  // Defining the return string + the song + the valid songs
-  let returnString;
-  let chosenSong;
-  let validSongs = [];
-
-  // Getting the help message if requested, otherwise searching the songs
-  if (message.content.endsWith('help')) {
-    returnString = database.PIUPrime2.Help();
-    returnString = returnString.replace(/<dps_cmd>/g, 'challenge');
-  } else if (message.content.endsWith('help2')) {
-    returnString = database.PIUPrime2.Help2();
-    returnString = returnString.replace(/<dps_cmd>/g, 'challenge');
-    returnString = returnString.replace('\n\n', ' [gimmick]\n\n');
-    returnString = returnString.substr(0, returnString.length - 3);
-    returnString += '- [gimmick]       = Adds a gameplay modifier to the challenge (append \':#\' for multiple modifiers)\n```';
-  } else {
-    validSongs = database.PIUPrime2.Search(message.content);
-  }
-
-  // IF the valid songs array is longer than one song, randomly choose a song
-  if (validSongs.length > 1) {
-    chosenSong = validSongs[Math.round(Math.random() * (validSongs.length - 1))];
-  } else if (validSongs.length === 1) { chosenSong = validSongs[0]; }
-
-  // IF a song was chosen, then format the string
-  if (chosenSong !== undefined) {
-    returnString = `\:dancer: <@${message.author.id}> 's CHALLENGE \:dancer:\nPlay`;
-
-    // ===== GETTING THE CHART TYPE =====
-    if (message.content.indexOf(' coop') > -1) {
-      // IF the user wanted a co-op chart, choose the first one (Prime 2 songs don't have multiple co-op charts)
-      returnString += ` the **Co-op (x${chosenSong.coop[0]})** chart of`;
-    } else if (message.content.indexOf(' dperformance') > -1) {
-      // ELSE IF the user wanted a DP chart, give it to them
-      let colonPos = message.content.indexOf(' dperformance:');
-      if (colonPos > -1) {
-        colonPos += 14;
-        let toMatch = message.content.substr(colonPos, 3);
-        const range = (toMatch.startsWith('~') ? 1 : 0);
-        toMatch = parseInt(toMatch.replace(/[^\d]/g, ''), 10);
-        toMatch = chosenSong.dPerformance.filter((num) => (num >= toMatch - range && num <= toMatch + range));
-        returnString += ` the **DP${toMatch[Math.floor(Math.random() * toMatch.length)]}** chart of`;
-      } else {
-        returnString += ' a **Double Performance** chart of';
-      }
-    } else if (message.content.indexOf(' sperformance') > -1) {
-      // ELSE IF the user wanted an SP chart, give it to them
-      let colonPos = message.content.indexOf(' sperformance:');
-      if (colonPos > -1) {
-        colonPos += 14;
-        let toMatch = message.content.substr(colonPos, 3);
-        const range = (toMatch.startsWith('~') ? 1 : 0);
-        toMatch = parseInt(toMatch.replace(/[^\d]/g, ''), 10);
-        toMatch = chosenSong.sPerformance.filter((num) => (num >= toMatch - range && num <= toMatch + range));
-        returnString += ` the **SP${toMatch[Math.floor(Math.random() * toMatch.length)]}** chart of`;
-      } else {
-        returnString += ' a **Single Performance** chart of';
-      }
-    } else if (message.content.indexOf(' double') > -1) {
-      // ELSE IF the user wanted a Double chart, give it to them
-      let colonPos = message.content.indexOf(' double:');
-      if (colonPos > -1) {
-        colonPos += 8;
-        let toMatch = message.content.substr(colonPos, 3);
-        const range = (toMatch.startsWith('~') ? 1 : 0);
-        toMatch = parseInt(toMatch.replace(/[^\d]/g, ''), 10);
-        toMatch = chosenSong.double.filter((num) => (num >= toMatch - range && num <= toMatch + range));
-        returnString += ` the **D${toMatch[Math.floor(Math.random() * toMatch.length)]}** chart of`;
-      } else {
-        returnString += ' a **Double** chart of';
-      }
-    } else if (message.content.indexOf(' single') > -1) {
-      // ELSE IF the user wanted a Single chart, give it to them
-      let colonPos = message.content.indexOf(' single:');
-      if (colonPos > -1) {
-        colonPos += 8;
-        let toMatch = message.content.substr(colonPos, 3);
-        const range = (toMatch.startsWith('~') ? 1 : 0);
-        toMatch = parseInt(toMatch.replace(/[^\d]/g, ''), 10);
-        toMatch = chosenSong.single.filter((num) => (num >= toMatch - range && num <= toMatch + range));
-        returnString += ` the **S${toMatch[Math.floor(Math.random() * toMatch.length)]}** chart of`;
-      } else {
-        returnString += ' a **Single** chart of';
-      }
-    }
-
-    // Adding the song name + artist
-    returnString += ` **${chosenSong.name} (${chosenSong.type})** (by ${chosenSong.artist})`;
-
-    // IF the BPM was defined, add it
-    if (message.content.indexOf(' bpm') > -1) {
-      returnString += ` (BPM: ${chosenSong.bpm})`;
-    }
-
-    // IF the Channel was defined, add it
-    if (message.content.indexOf(' channel') > -1) {
-      returnString += ` (Channel: ${chosenSong.channel})`;
-    }
-
-    // IF Gimmicks were requested, add them
-    if (message.content.indexOf(' gimmick') > -1) {
-      // Determining the amount of gimmicks
-      let gimmickNum = message.content.indexOf(' gimmick:');
-      if (gimmickNum > -1) {
-        gimmickNum = parseInt(message.content.substr(gimmickNum + 9, 2), 10);
-      } else { gimmickNum = 1; }
-
-      // Truncating the gimmick amount
-      if (gimmickNum < 1 || Number.isNaN(gimmickNum)) {
-        gimmickNum = 1;
-      } else if (gimmickNum > piuPrime2GimmickMax) {
-        gimmickNum = piuPrime2GimmickMax;
-      }
-
-      // Adding the gimmick intro text
-      returnString += ` with the following gimmick${(gimmickNum > 1 ? 's:' : ':')}`;
-
-      // Defining the gimmicks
-      returnString += piuPrime2Gimmicks(gimmickNum);
-    }
-
-    // Adding the Series
-    returnString += `\n(Series: ${chosenSong.series})`;
-  }
-
-  // IF the return string has not been defined yet... (no matches found)
-  if (returnString === undefined) {
-    returnString = '\:open_file_folder: No songs could be found with those restrictions! '
-                  + `Enter \`challenge ${prime2Identities[0]} help\` to see the list of `
-                  + 'valid challenge options for this game.';
-  }
-
-  // Returning the return string
-  return returnString;
-}
-
-// iidxMobileChallenge()
-function iidxMobileChallenge(message) {
-  // Defining the return string + the song + the valid songs
-  let returnString;
-  let chosenSong;
-  let validSongs = [];
-
-  // Getting the help message if requested, otherwise searching the songs
-  if (message.content.endsWith('help')) {
-    returnString = database.IIDXMobile.Help();
-    returnString = returnString.replace(/<dps_cmd>/g, 'challenge');
-  } else if (message.content.endsWith('help2')) {
-    returnString = database.IIDXMobile.Help2();
-    returnString = returnString.replace(/<dps_cmd>/g, 'challenge');
-  } else {
-    validSongs = database.IIDXMobile.Search(message.content);
-  }
-
-  // IF the valid songs array is longer than one song, randomly choose a song
-  if (validSongs.length > 1) {
-    chosenSong = validSongs[Math.round(Math.random() * (validSongs.length - 1))];
-  } else if (validSongs.length === 1) { chosenSong = validSongs[0]; }
-
-  // IF a song was chosen, format the return string
-  if (chosenSong !== undefined) {
-    returnString = `\:cd:\:point_left: <@${message.author.id}> 's CHALLENGE \:point_right:\:cd:\nPlay`;
-
-    // Listing the difficulty
-    if (message.content.toLowerCase().indexOf(' another') > -1) {
-      returnString += ` the **Another (${chosenSong.spa})** chart of`;
-    } else if (message.content.toLowerCase().indexOf(' hyper') > -1) {
-      returnString += ` the **Hyper (${chosenSong.sph})** chart of`;
-    } else if (message.content.toLowerCase().indexOf(' normal') > -1) {
-      returnString += ` the **Normal (${chosenSong.spn})** chart of`;
-    } else if (message.content.toLowerCase().indexOf(' beginner') > -1) {
-      returnString += ` the **Beginner (${chosenSong.beginner})** chart of`;
-    }
-    returnString += ` **${chosenSong.name}** (by ${chosenSong.artist})`;
-
-    // Listing other parameters (if requested)
-    if (message.content.toLowerCase().indexOf(' genre') > -1) {
-      returnString += ` (Genre: ${chosenSong.genre})`;
-    }
-    if (message.content.toLowerCase().indexOf(' bpm') > -1) {
-      returnString += ` (BPM: ${chosenSong.bpm})`;
-    }
-    if (message.content.toLowerCase().indexOf(' origin') > -1) {
-      returnString += ` (Origin: ${chosenSong.origin})`;
-    }
-    if (message.content.toLowerCase().indexOf(' price') > -1) {
-      returnString += ` (Price: ${chosenSong.price})`;
-    }
-
-    // Adding the song style
-    returnString += `\n(Style: ${chosenSong.style})`;
-  }
-
-  // IF the return string has not been defined yet... (no matches found)
-  if (returnString === undefined) {
-    returnString = '\:open_file_folder: No songs could be found with those restrictions! '
-                  + `Enter \`challenge ${iidxMobileIdentities[0]} help\` to see the list of `
-                  + 'valid challenge options for this game.';
-  }
-
-  // Returning the return string
-  return returnString;
 }
 
 // challenge()
 function challenge(message) {
-  let found = false;
-  let stringToPrint = '';
+  // Getting the first token of the command + its related module
+  const firstToken = message.content.split(' ')[0];
+  const chosenMod = database.IdentityToModuleName(firstToken);
 
-  // Groove Coaster PC
-  for (let num = 0; !found && num < gcpcIdentities.length; num++) {
-    if (message.content.startsWith(gcpcIdentities[num])) {
-      stringToPrint = grooveCoasterPcChallenge(message);
-      found = true;
-    }
+  // IF support was requested, show the user the supported games
+  if (firstToken === 'support') {
+    message.channel.send(database.SupportedGames());
+  } else if (chosenMod === undefined) {
+    // ELSE IF the module was not found, show the help message
+    message.channel.send(help());
+  } else if (message.content.endsWith(' help')) {
+    // ELSE IF the user just wants database search help (basic)
+    let gameHelp = database.Modules[chosenMod].Help();
+    gameHelp = gameHelp.replace(/<dps_cmd>/g, 'challenge');
+    message.channel.send(gameHelp);
+  } else if (message.content.endsWith(' help2')) {
+    // ELSE IF the user just wants database search help (advanced)
+    let gameHelp = database.Modules[chosenMod].Help2();
+    gameHelp = gameHelp.replace(/<dps_cmd>/g, 'challenge');
+    message.channel.send(gameHelp);
+  } else {
+    // ELSE just search the database
+    formatChallenge(message, chosenMod);
   }
-
-  // IIDX Ultimate Mobile
-  for (let num = 0; !found && num < iidxMobileIdentities.length; num++) {
-    if (message.content.startsWith(iidxMobileIdentities[num])) {
-      stringToPrint = iidxMobileChallenge(message);
-      found = true;
-    }
-  }
-
-  // Muse Dash
-  for (let num = 0; !found && num < museDashIdentities.length; num++) {
-    if (message.content.startsWith(museDashIdentities[num])) {
-      stringToPrint = museDashChallenge(message);
-      found = true;
-    }
-  }
-
-  // PIU Prime 2
-  for (let num = 0; !found && num < prime2Identities.length; num++) {
-    if (message.content.startsWith(prime2Identities[num])) {
-      stringToPrint = piuPrime2Challenge(message);
-      found = true;
-    }
-  }
-
-  // List of Supported Games
-  if (message.content === 'support') {
-    stringToPrint = database.SupportedGames();
-    found = true;
-  }
-
-  if (!found) {
-    stringToPrint = 'Proper Usage:\n```challenge [game] [criteria?]\n\n'
-                    + "- [game]       = The game to choose the chart from ('support' lists all supported games)\n"
-                    + "- [criteria?]  = Restricts chosen song to certain criteria (issue 'challenge [game] "
-                    + "help' to see options)```";
-  }
-
-  message.channel.send(stringToPrint);
 }
 
 // Exported Command
