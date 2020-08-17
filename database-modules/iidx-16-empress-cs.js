@@ -42,37 +42,12 @@ const newlineChar = process.env.NEWLINE_CHAR;
 function loadSongs() {
   let fileString = fs.readFileSync(songFile, 'utf8');
   let songString = [];
-  let counter = 0;
-  let nextCommaPos = -1;
 
   fileString = fileString.split(newlineChar);
   for (let num = 1; num < fileString.length; num++) {
     if (fileString[num].includes(',')) {
       // Reading the song info string from the CSV
-      songString = [];
-      counter = 0;
-      while (fileString[num].length > 0) {
-        if (fileString[num].startsWith('"')) {
-          nextCommaPos = fileString[num].indexOf('",');
-          if (nextCommaPos > -1) {
-            songString[counter] = fileString[num].substr(1, nextCommaPos - 1);
-            fileString[num] = fileString[num].substr(nextCommaPos + 2);
-          } else {
-            songString[counter] = fileString[num].substr(1, fileString[num].length - 2);
-            fileString[num] = 0;
-          }
-        } else {
-          nextCommaPos = fileString[num].indexOf(',');
-          if (nextCommaPos > -1) {
-            songString[counter] = fileString[num].substr(0, nextCommaPos);
-            fileString[num] = fileString[num].substr(nextCommaPos + 1);
-          } else {
-            songString[counter] = fileString[num];
-            fileString[num] = 0;
-          }
-        }
-        counter++;
-      }
+      songString = database.ParseStringFromCSV(fileString[num]);
 
       // Creating the song object
       iidx16csSongs[num - 1] = {

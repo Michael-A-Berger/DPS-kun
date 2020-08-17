@@ -154,7 +154,7 @@ function songStringCompare(song, property, matchPhrase, equal = false) {
   // IF the song exists...
   if (song !== undefined) {
     // IF the match phrase is not empty...
-    if (matchPhrase.length > 0) {
+    if (matchPhrase !== undefined && matchPhrase.length > 0) {
       // IF we're looking for an equal match, check if the match phrase is the property
       if (equal) {
         if (Array.isArray(song[property])) {
@@ -170,7 +170,7 @@ function songStringCompare(song, property, matchPhrase, equal = false) {
       }
     } else {
       // ELSE just check if the property is defined
-      result = (song[property].length > 0);
+      result = (song[property] !== undefined && song[property].length > 0);
     }
   }
 

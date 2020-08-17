@@ -41,7 +41,7 @@ function loadSongs() {
   fileString = fileString.split(newlineChar);
   for (let num = 1; num < fileString.length; num++) {
     if (fileString[num].includes(',')) {
-      songString = fileString[num].split(',');
+      songString = database.ParseStringFromCSV(fileString[num]);
       iidxmSongs[num - 1] = {
         genre: songString[0],
         name: songString[1],
@@ -213,15 +213,68 @@ function helpFull() {
   return database.HelpFromSearchParams(searchParams, identities[0]);
 }
 
+// chartName()
+function chartName(song, searchJSON) {
+  // Creating the chart name variable
+  let name = '';
+
+  // Defining the chart name
+  if (searchJSON.another) {
+    name = `Another (${song.spa})`;
+  } else if (searchJSON.hyper) {
+    name = `Hyper (${song.sph})`;
+  } else if (searchJSON.normal) {
+    name = `Normal (${song.spn})`;
+  } else if (searchJSON.beginner) {
+    name = `Beginner (${song.beginner})`;
+  }
+
+  // Returning the chart name
+  return name;
+}
+
+// miscProperties()
+function miscProperties(song, searchJSON) {
+  // Defining the miscellaneous properties object
+  const otherProps = {};
+
+  // Setting the other properties to record
+  if (searchJSON.genre) {
+    otherProps.Genre = song.genre;
+  }
+  if (searchJSON.bpm) {
+    otherProps.BPM = song.bpm;
+  }
+  if (searchJSON.origin) {
+    otherProps.Origin = song.origin;
+  }
+  if (searchJSON.price) {
+    otherProps.Price = song.price;
+  }
+
+  // Returning the miscellaneous properties object
+  return otherProps;
+}
+
+// sortCategory()
+function sortCategory(song) {
+  return `(Style: **${song.style}**)`;
+}
+
 // Setting up the exports
 module.exports = {
   ModuleName: 'IIDXMobile',
   FullGameName: 'IIDX Ultimate Mobile',
   CommandIdentities: identities,
+  Header: header,
   Load: loadSongs,
   Songs: iidxmSongs,
   Format: format,
+  SearchParams: searchParams,
   Search: search,
+  ChartName: chartName,
+  MiscProperties: miscProperties,
+  SortCategory: sortCategory,
   Help: helpShort,
   Help2: helpFull,
 };

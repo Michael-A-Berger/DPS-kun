@@ -32,32 +32,12 @@ const newlineChar = process.env.NEWLINE_CHAR;
 function loadSongs() {
   let fileString = fs.readFileSync(songFile, 'utf8');
   let songString = [];
-  let counter = 0;
-  let nextCommaPos = -1;
 
   fileString = fileString.split(newlineChar);
   for (let num = 1; num < fileString.length; num++) {
     if (fileString[num].includes(',')) {
       // Reading the song info string from the CSV
-      songString = [];
-      counter = 0;
-      while (fileString[num].length > 0) {
-        if (fileString[num].startsWith('"')) {
-          nextCommaPos = fileString[num].indexOf('",');
-          songString[counter] = fileString[num].substr(1, nextCommaPos - 1);
-          fileString[num] = fileString[num].substr(nextCommaPos + 2);
-        } else {
-          nextCommaPos = fileString[num].indexOf(',');
-          if (nextCommaPos > -1) {
-            songString[counter] = fileString[num].substr(0, nextCommaPos);
-            fileString[num] = fileString[num].substr(nextCommaPos + 1);
-          } else {
-            songString[counter] = fileString[num];
-            fileString[num] = 0;
-          }
-        }
-        counter++;
-      }
+      songString = database.ParseStringFromCSV(fileString[num]);
 
       // Creating the song object
       msdsSongs[num - 1] = {
@@ -190,6 +170,45 @@ function search(paramString) {
   return songMatches;
 }
 
+// chartName()
+function chartName(song, searchJSON) {
+  //
+  let name = '';
+
+  //
+  if (searchJSON.hidden) {
+    name = `Hidden (${song.hidden})`;
+  } else if (searchJSON.master) {
+    name = `Master (${song.master})`;
+  } else if (searchJSON.hard) {
+    name = `Hard (${song.hard})`;
+  } else if (searchJSON.easy) {
+    name = `Easy (${song.easy})`;
+  }
+
+  //
+  return name;
+}
+
+// miscProperties()
+function miscProperties(song, searchJSON) {
+  //
+  const otherProps = {};
+
+  //
+  if (searchJSON.bpm) {
+    otherProps.BPM = song.bpm;
+  }
+
+  //
+  return otherProps;
+}
+
+// sortCategory()
+function sortCategory(song) {
+  return `(Pack: ${song.pack})`;
+}
+
 // help()
 function help() {
   return database.HelpFromSearchParams(searchParams, identities[0]);
@@ -200,10 +219,15 @@ module.exports = {
   ModuleName: 'MuseDash',
   FullGameName: 'Muse Dash',
   CommandIdentities: identities,
+  Header: header,
   Load: loadSongs,
   Songs: msdsSongs,
   Format: format,
+  SearchParams: searchParams,
   Search: search,
+  ChartName: chartName,
+  MiscProperties: miscProperties,
+  SortCategory: sortCategory,
   Help: help,
   Help2: help,
 };

@@ -35,7 +35,7 @@ function loadSongs() {
   fileString = fileString.split(newlineChar);
   for (let num = 1; num < fileString.length; num++) {
     if (fileString[num].includes(',')) {
-      songString = fileString[num].split(',');
+      songString = database.ParseStringFromCSV(fileString[num]);
       gcpcSongs[num - 1] = {
         name: songString[0],
         artist: songString[1],

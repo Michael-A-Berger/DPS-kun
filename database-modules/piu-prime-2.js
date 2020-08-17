@@ -42,7 +42,7 @@ function loadSongs() {
   fileString = fileString.split(newlineChar);
   for (let num = 1; num < fileString.length; num++) {
     if (fileString[num].includes(',')) {
-      songString = fileString[num].split(',');
+      songString = database.ParseStringFromCSV(fileString[num]);
       currentSong = {
         type: songString[0],
         bpm: songString[1],
@@ -239,6 +239,113 @@ function search(paramString) {
   return songMatches;
 }
 
+// chartName()
+function chartName(song, searchJSON) {
+  //
+  let name = '';
+
+  // IF the coop search was defined, get the coop chart name
+  if (searchJSON.coop) {
+    if (Number.isNaN(searchJSON.coopTerm)) {
+      name = 'Co-op';
+    } else if (searchJSON.coopRange) {
+      for (let num = -1; name.length < 1 && num < 2; num++) {
+        if (song.coop.indexOf(searchJSON.coopTerm + num) > -1) {
+          name = `Co-op x${(searchJSON.coopTerm + num)}`;
+        }
+      }
+    } else {
+      name = `Co-op x${searchJSON.coopTerm}`;
+    }
+  } else if (searchJSON.dperformance) {
+    // ELSE IF the double performance search was defined, get the double performance chart name
+    if (Number.isNaN(searchJSON.dperformanceTerm)) {
+      name = 'Double Performance';
+    } else if (searchJSON.dperformanceRange) {
+      for (let num = -1; name.length < 1 && num < 2; num++) {
+        if (song.dPerformance.indexOf(searchJSON.dperformanceTerm + num) > -1) {
+          name = `DP${(searchJSON.dperformanceTerm + num)}`;
+        }
+      }
+    } else {
+      name = `DP${(searchJSON.dperformanceTerm)}`;
+    }
+  } else if (searchJSON.sperformance) {
+    // ELSE IF the single performance search was defined, get the single performance chart name
+    if (Number.isNaN(searchJSON.sperformanceTerm)) {
+      name = 'Single Performance';
+    } else if (searchJSON.sperformanceRange) {
+      for (let num = -1; name.length < 1 && num < 2; num++) {
+        if (song.sPerformance.indexOf(searchJSON.sperformanceTerm + num) > -1) {
+          name = `SP${(searchJSON.sperformanceTerm + num)}`;
+        }
+      }
+    } else {
+      name = `SP${searchJSON.sperformanceTerm}`;
+    }
+  } else if (searchJSON.double) {
+    // ELSE IF the double search was defined, get the double chart name
+    if (Number.isNaN(searchJSON.doubleTerm)) {
+      name = 'Double';
+    } else if (searchJSON.doubleRange) {
+      for (let num = -1; name.length < 1 && num < 2; num++) {
+        if (song.doube.indexOf(searchJSON.doubleTerm + num) > -1) {
+          name = `D${(searchJSON.doubleTerm + num)}`;
+        }
+      }
+    } else {
+      name = `D${searchJSON.doubleTerm}`;
+    }
+  } else if (searchJSON.single) {
+    // ELSE IF the single search was defined, get the single chart name
+    if (Number.isNaN(searchJSON.singleTerm)) {
+      name = 'Single';
+    } else if (searchJSON.singleRange) {
+      for (let num = -1; name.length < 1 && num < 2; num++) {
+        if (song.single.indexOf(searchJSON.singleTerm + num) > -1) {
+          name = `S${(searchJSON.singleTerm + num)}`;
+        }
+      }
+    } else {
+      name = `S${searchJSON.singleTerm}`;
+    }
+  }
+
+  //
+  return name;
+}
+
+// miscProperties()
+function miscProperties(song, searchJSON) {
+  //
+  const otherProps = {};
+
+  //
+  if (searchJSON.bpm) {
+    otherProps.BPM = song.bpm;
+  }
+  if (searchJSON.type) {
+    otherProps.Type = song.type;
+  }
+  if (searchJSON.version) {
+    otherProps.Version = song.version;
+  }
+  if (searchJSON.channel) {
+    otherProps.Channel = song.channel;
+  }
+  if (searchJSON.exclusive) {
+    otherProps.RegionExclusivity = song.exclusivity;
+  }
+
+  //
+  return otherProps;
+}
+
+// sortCategory()
+function sortCategory(song) {
+  return `(Series: ${song.series})`;
+}
+
 // help()
 function helpShort() {
   const exclusions = [
@@ -262,10 +369,15 @@ module.exports = {
   ModuleName: 'PIUPrime2',
   FullGameName: 'Pump It Up Prime 2',
   CommandIdentities: identities,
+  Header: header,
   Load: loadSongs,
   Songs: prime2Songs,
   Format: format,
+  SearchParams: searchParams,
   Search: search,
+  ChartName: chartName,
+  MiscProperties: miscProperties,
+  SortCategory: sortCategory,
   Help: helpShort,
   Help2: helpFull,
 };
