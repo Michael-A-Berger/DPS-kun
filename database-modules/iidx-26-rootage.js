@@ -9,7 +9,6 @@ const songFile = `${__dirname}/../database/iidx-26-rootage.csv`;
 const identities = ['iidx26rootage', 'rootage', 'iidx26'];
 const iidx26Songs = [];
 const searchParams = {};
-const noCommaInParenthesesRegex = /,\s*(?![^\[\(]*[\]\)])/g;
 
 // Defining the IIDX Styles array constant
 const iidxStyles = [
@@ -164,7 +163,7 @@ function loadSongs() {
         if (intParseStart <= propNum && propNum <= intParseStop) {
           tempSong[songProps[propNum]] = parseInt(songString[propNum], 10);
         } else {
-          let newProp = songString[propNum].split(noCommaInParenthesesRegex);
+          let newProp = songString[propNum].split(database.NoCommaInParenthesesRegex);
           if (newProp.length === 1) [newProp] = newProp;
           if (propNum === firstGameIndex) {
             newProp = newProp.split(/\s*\/\s*/g);
@@ -179,36 +178,6 @@ function loadSongs() {
   }
 
   console.log(`-- IIDX 26 Rootage songs loaded! (Total: ${iidx26Songs.length})`);
-}
-
-// formatArrayForString()
-function formatArrayForString(propArray, limit = 999, boldNames = true) {
-  // Defining the print string + early definition boolean
-  let printStr = '';
-
-  // IF the property array is an actual array, create the formatted array string
-  if (typeof propArray !== 'string' && propArray.length > 1) {
-    for (let num = 0; num < propArray.length && num < limit; num++) {
-      if (num === propArray.length - 1) printStr += ' and ';
-      if (boldNames) printStr += `**${propArray[num]}**`;
-      else printStr += propArray[num];
-      if (num < propArray.length - 2) printStr += ', ';
-    }
-    if (limit < propArray.length) {
-      printStr += `and ${propArray.length - limit} others`;
-    }
-  } else if (typeof propArray === 'string') {
-    // ELSE IF the property array is just a string, format it accordingly
-    printStr = propArray;
-    if (boldNames) printStr = `**${printStr}**`;
-  } else {
-    // ELSE... (the property array is an actual array, get the first element)
-    [printStr] = propArray;
-    if (boldNames) printStr = `**${printStr}**`;
-  }
-
-  // Returning the print string
-  return printStr;
 }
 
 // checkEveryChart()
@@ -245,11 +214,11 @@ function format(song) {
 
   // Generic song details, #1
   songStr += `\n- Artist: **${song.artist}**`;
-  songStr += `\n- Composition: ${formatArrayForString(song.composition)}`;
-  songStr += `\n- Arrangement: ${formatArrayForString(song.arrangement)}`;
+  songStr += `\n- Composition: ${database.FormatArrayForString(song.composition)}`;
+  songStr += `\n- Arrangement: ${database.FormatArrayForString(song.arrangement)}`;
   songStr += `\n- Genre: **${song.genre}**`;
-  songStr += `\n- BPM: ${formatArrayForString(song.bpm)}`;
-  songStr += `\n- Length: ${formatArrayForString(song.length)}`;
+  songStr += `\n- BPM: ${database.FormatArrayForString(song.bpm)}`;
+  songStr += `\n- Length: ${database.FormatArrayForString(song.length)}`;
   songStr += '\n- Charts:';
 
   // Difficulty - Beginner
@@ -407,11 +376,11 @@ function format(song) {
   }
 
   // Generic Song Details, #2
-  songStr += `\n- First BEMANI Game: ${formatArrayForString(song.firstgame, 3)}`;
+  songStr += `\n- First BEMANI Game: ${database.FormatArrayForString(song.firstgame, 3)}`;
   if (song.othergames.length > 0) {
-    songStr += `\n- Other BEMANI Game Appearances: ${formatArrayForString(song.othergames, 3)}`;
+    songStr += `\n- Other BEMANI Game Appearances: ${database.FormatArrayForString(song.othergames, 3)}`;
   }
-  songStr += `\n- Video Jockey: ${formatArrayForString(song.vj)}`;
+  songStr += `\n- Video Jockey: ${database.FormatArrayForString(song.vj)}`;
   songStr += `\n- RemyWiki page: ${song.remywiki}`;
 
   // Returning the formatted song string
@@ -800,16 +769,16 @@ function miscProperties(song, searchJSON) {
 
   // Setting the other properties to record
   if (searchJSON.composition) {
-    otherProps.Composition = formatArrayForString(song.composition, 999, false);
+    otherProps.Composition = database.FormatArrayForString(song.composition, 999, false);
   }
   if (searchJSON.arrangement) {
-    otherProps.Arrangement = formatArrayForString(song.arrangement, 999, false);
+    otherProps.Arrangement = database.FormatArrayForString(song.arrangement, 999, false);
   }
   if (searchJSON.genre) {
     otherProps.Genre = song.genre;
   }
   if (searchJSON.bpm) {
-    otherProps.BPM = formatArrayForString(song.bpm, 999, false);
+    otherProps.BPM = database.FormatArrayForString(song.bpm, 999, false);
   }
 
   // Returning the miscellaneous properties object

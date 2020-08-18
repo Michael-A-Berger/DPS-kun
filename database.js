@@ -21,6 +21,7 @@ const moduleExports = [
 ];
 let loadedModules = [];
 let identityDictionary = [];
+const noCommaInParenthesesRegex = /,\s*(?![^\[\(]*[\]\)])/g;
 
 /* =================================
  * ===== MODULE HELP FUNCTIONS =====
@@ -38,7 +39,8 @@ function parseStringFromCSV(str) {
   let nextCommaPos = 0;
 
   // WHILE the copied CSV string still has data...
-  while (csvStr.length > 0) {
+  // while (csvStr.length > 0) {
+  while (csvStr !== '🔣') {
     // IF the CSV string starts with a quote, find the next instance of a quote w/ a comma right after it
     if (csvStr.startsWith('"')) {
       nextCommaPos = csvStr.indexOf('",');
@@ -49,7 +51,7 @@ function parseStringFromCSV(str) {
       } else {
         // ELSE... (the next comma was NOT found, ergo just get until the end of the string)
         parsedStr[counter] = csvStr.substr(1, csvStr.length - 2).replace(/\"\"+/g, '"');
-        csvStr = 0;
+        csvStr = '🔣';
       }
     } else {
       // ELSE... (CSV string does NOT start with a quote, so find the next comma)
@@ -61,7 +63,7 @@ function parseStringFromCSV(str) {
       } else {
         // ELSE... (the next comma was NOT found, ergo just get until the end of the string)
         parsedStr[counter] = csvStr;
-        csvStr = 0;
+        csvStr = '🔣';
       }
     }
     counter++;
@@ -204,6 +206,36 @@ function songIntCompare(song, property, matchNum, range = 0) {
   return result;
 }
 
+// formatArrayForString()
+function formatArrayForString(propArray, limit = 999, boldNames = true) {
+  // Defining the print string + early definition boolean
+  let printStr = '';
+
+  // IF the property array is an actual array, create the formatted array string
+  if (typeof propArray !== 'string' && propArray.length > 1) {
+    for (let num = 0; num < propArray.length && num < limit; num++) {
+      if (num === propArray.length - 1) printStr += ' and ';
+      if (boldNames) printStr += `**${propArray[num]}**`;
+      else printStr += propArray[num];
+      if (num < propArray.length - 2) printStr += ', ';
+    }
+    if (limit < propArray.length) {
+      printStr += `and ${propArray.length - limit} others`;
+    }
+  } else if (typeof propArray === 'string') {
+    // ELSE IF the property array is just a string, format it accordingly
+    printStr = propArray;
+    if (boldNames) printStr = `**${printStr}**`;
+  } else {
+    // ELSE... (the property array is an actual array, get the first element)
+    [printStr] = propArray;
+    if (boldNames) printStr = `**${printStr}**`;
+  }
+
+  // Returning the print string
+  return printStr;
+}
+
 // helpFromSearchParams()
 function helpFromSearchParams(searchParams, gameId, exceptions = []) {
   // Defining the help string
@@ -331,11 +363,13 @@ module.exports = {
   IdentityToModuleName: identityToModName,
   SupportedGames: supportedGames,
   Modules: loadedModules,
+  NoCommaInParenthesesRegex: noCommaInParenthesesRegex,
   ParseStringFromCSV: parseStringFromCSV,
   DefineSearchParam: defineSearchParam,
   SearchTextToJSON: searchTextToJSON,
   SongStringCompare2: songStringCompare,
   SongIntCompare2: songIntCompare,
+  FormatArrayForString: formatArrayForString,
   HelpFromSearchParams: helpFromSearchParams,
   ReverseEmoji: reverseEmoji,
 };
