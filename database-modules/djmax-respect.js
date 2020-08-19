@@ -4,11 +4,12 @@ const fs = require('fs');
 const database = require(`${__dirname}/../database.js`);
 
 // Constant variables
-const header = '\:crown:\:skull:';
+const header = '\:trophy:\:crown:\:skull:';
 const songFile = `${__dirname}/../database/djmax-respect.csv`;
 const identities = ['djmaxrespect', 'respect', 'djmr'];
 const djmrSongs = [];
 const searchParams = {};
+const diffRange = 1;
 
 // Defining the search parameters
 searchParams.name = database.DefineSearchParam('Song name contains \'?\' (no spaces)', '', ':?');
@@ -16,18 +17,22 @@ searchParams.composer = database.DefineSearchParam('Song composer name contains 
 searchParams.vocalist = database.DefineSearchParam('Song vocalist name contains \'?\' (no spaces)', '', ':?');
 searchParams.genre = database.DefineSearchParam('Song genre name contains \'?\' (no spaces)', '', ':?');
 searchParams.bpm = database.DefineSearchParam('Song\'s BPM exactly matches \'#\' (prepend \'~\' for range of -/+ 10 BPM)', 1, ':#');
+searchParams['4b'] = database.DefineSearchParam('Song must have a 4B chart (append \':#\' for exact difficulty, \':~#\' for range)', 1);
 searchParams['4bnm'] = database.DefineSearchParam('Song must have a 4B Normal chart (append \':#\' for exact difficulty, \':~#\' for range)', 1);
 searchParams['4bhd'] = database.DefineSearchParam('Song must have a 4B Hard chart', 1);
-searchParams['4bmx'] = database.DefineSearchParam(searchParams['4bhd'].description.replace('4B Hard', '4B Maximum'), 1);
-searchParams['4bsc'] = database.DefineSearchParam(searchParams['4bhd'].description.replace('4B Hard', '4B SC'), 1);
+searchParams['4bmx'] = database.DefineSearchParam(searchParams['4bhd'].description.replace('Hard', 'Maximum'), 1);
+searchParams['4bsc'] = database.DefineSearchParam(searchParams['4bhd'].description.replace('Hard', 'SC'), 1);
+searchParams['5b'] = database.DefineSearchParam(searchParams['4b'].description.replace('4B', '5B'), 1);
 searchParams['5bnm'] = database.DefineSearchParam(searchParams['4bhd'].description.replace('4B Hard', '5B Normal'), 1);
 searchParams['5bhd'] = database.DefineSearchParam(searchParams['4bhd'].description.replace('4B Hard', '5B Hard'), 1);
 searchParams['5bmx'] = database.DefineSearchParam(searchParams['4bhd'].description.replace('4B Hard', '5B Maximum'), 1);
 searchParams['5bsc'] = database.DefineSearchParam(searchParams['4bhd'].description.replace('4B Hard', '5B SC'), 1);
+searchParams['6b'] = database.DefineSearchParam(searchParams['4b'].description.replace('4B', '6B'), 1);
 searchParams['6bnm'] = database.DefineSearchParam(searchParams['4bhd'].description.replace('4B Hard', '6B Normal'), 1);
 searchParams['6bhd'] = database.DefineSearchParam(searchParams['4bhd'].description.replace('4B Hard', '6B Hard'), 1);
 searchParams['6bmx'] = database.DefineSearchParam(searchParams['4bhd'].description.replace('4B Hard', '6B Maximum'), 1);
 searchParams['6bsc'] = database.DefineSearchParam(searchParams['4bhd'].description.replace('4B Hard', '6B SC'), 1);
+searchParams['8b'] = database.DefineSearchParam(searchParams['4b'].description.replace('a 4B', 'an 8B'), 1);
 searchParams['8bnm'] = database.DefineSearchParam(searchParams['4bhd'].description.replace('a 4B Hard', 'an 8B Normal'), 1);
 searchParams['8bhd'] = database.DefineSearchParam(searchParams['4bhd'].description.replace('a 4B Hard', 'an 8B Hard'), 1);
 searchParams['8bmx'] = database.DefineSearchParam(searchParams['4bhd'].description.replace('a 4B Hard', 'an 8B Maximum'), 1);
@@ -189,12 +194,9 @@ function format(song) {
 }
 
 // search()
-function search(paramString) {
+function search(searchJSON) {
   // Defining the returning array
   let songMatches = [];
-
-  // Parsing the parameter string to a JSON object
-  const searchJSON = database.SearchTextToJSON(searchParams, paramString);
 
   // ==================================
   // ===== GETTING MATCHING SONGS =====
@@ -212,7 +214,7 @@ function search(paramString) {
       criteriaMet = criteriaMet && test;
     }
 
-    // Artist
+    // Composer
     if (searchJSON.composer) {
       test = database.SongStringCompare2(song, 'artist', searchJSON.composerTerm);
       criteriaMet = criteriaMet && test;
@@ -220,7 +222,7 @@ function search(paramString) {
 
     // Vocalist
     if (searchJSON.vocalist) {
-      test = database.SongStringCompare2(song, 'vocaist', searchJSON.vocalistTerm);
+      test = database.SongStringCompare2(song, 'vocalist', searchJSON.vocalistTerm);
       criteriaMet = criteriaMet && test;
     }
 
@@ -238,91 +240,131 @@ function search(paramString) {
       criteriaMet = criteriaMet && test;
     }
 
-    // Four Buttons
+    // Four Buttons - Generic
+    if (searchJSON['4b']) {
+      range = searchJSON['4bRange'];
+      test = database.SongIntCompare2(song, 'normal4b', searchJSON['4bTerm'], (range ? diffRange : 0));
+      test = test || database.SongIntCompare2(song, 'hard4b', searchJSON['4bTerm'], (range ? diffRange : 0));
+      test = test || database.SongIntCompare2(song, 'maximum4b', searchJSON['4bTerm'], (range ? diffRange : 0));
+      test = test || database.SongIntCompare2(song, 'sc4b', searchJSON['4bTerm'], (range ? diffRange : 0));
+      criteriaMet = criteriaMet && test;
+    }
+
+    // Four Buttons - Chart Names
     if (searchJSON['4bnm']) {
       range = searchJSON['4bnmRange'];
-      test = database.SongIntCompare2(song, 'normal4b', searchJSON['4bnmTerm'], (range ? 1 : 0));
+      test = database.SongIntCompare2(song, 'normal4b', searchJSON['4bnmTerm'], (range ? diffRange : 0));
       criteriaMet = criteriaMet && test;
     }
     if (searchJSON['4bhd']) {
       range = searchJSON['4bhdRange'];
-      test = database.SongIntCompare2(song, 'hard4b', searchJSON['4bhdTerm'], (range ? 1 : 0));
+      test = database.SongIntCompare2(song, 'hard4b', searchJSON['4bhdTerm'], (range ? diffRange : 0));
       criteriaMet = criteriaMet && test;
     }
     if (searchJSON['4bmx']) {
       range = searchJSON['4bmxRange'];
-      test = database.SongIntCompare2(song, 'maximum4b', searchJSON['4bmxTerm'], (range ? 1 : 0));
+      test = database.SongIntCompare2(song, 'maximum4b', searchJSON['4bmxTerm'], (range ? diffRange : 0));
       criteriaMet = criteriaMet && test;
     }
     if (searchJSON['4bsc']) {
       range = searchJSON['4bscRange'];
-      test = database.SongIntCompare2(song, 'sc4b', searchJSON['4bscTerm'], (range ? 1 : 0));
+      test = database.SongIntCompare2(song, 'sc4b', searchJSON['4bscTerm'], (range ? diffRange : 0));
       criteriaMet = criteriaMet && test;
     }
 
-    // Five Buttons
+    // Five Buttons - Generic
+    if (searchJSON['5b']) {
+      range = searchJSON['5bRange'];
+      test = database.SongIntCompare2(song, 'normal5b', searchJSON['5bTerm'], (range ? diffRange : 0));
+      test = test || database.SongIntCompare2(song, 'hard5b', searchJSON['5bTerm'], (range ? diffRange : 0));
+      test = test || database.SongIntCompare2(song, 'maximum5b', searchJSON['5bTerm'], (range ? diffRange : 0));
+      test = test || database.SongIntCompare2(song, 'sc5b', searchJSON['5bTerm'], (range ? diffRange : 0));
+      criteriaMet = criteriaMet && test;
+    }
+
+    // Five Buttons - Chart Names
     if (searchJSON['5bnm']) {
       range = searchJSON['5bnmRange'];
-      test = database.SongIntCompare2(song, 'normal5b', searchJSON['5bnmTerm'], (range ? 1 : 0));
+      test = database.SongIntCompare2(song, 'normal5b', searchJSON['5bnmTerm'], (range ? diffRange : 0));
       criteriaMet = criteriaMet && test;
     }
     if (searchJSON['5bhd']) {
       range = searchJSON['5bhdRange'];
-      test = database.SongIntCompare2(song, 'hard5b', searchJSON['5bhdTerm'], (range ? 1 : 0));
+      test = database.SongIntCompare2(song, 'hard5b', searchJSON['5bhdTerm'], (range ? diffRange : 0));
       criteriaMet = criteriaMet && test;
     }
     if (searchJSON['5bmx']) {
       range = searchJSON['5bmxRange'];
-      test = database.SongIntCompare2(song, 'maximum5b', searchJSON['5bmxTerm'], (range ? 1 : 0));
+      test = database.SongIntCompare2(song, 'maximum5b', searchJSON['5bmxTerm'], (range ? diffRange : 0));
       criteriaMet = criteriaMet && test;
     }
     if (searchJSON['5bsc']) {
       range = searchJSON['5bscRange'];
-      test = database.SongIntCompare2(song, 'sc5b', searchJSON['5bscTerm'], (range ? 1 : 0));
+      test = database.SongIntCompare2(song, 'sc5b', searchJSON['5bscTerm'], (range ? diffRange : 0));
       criteriaMet = criteriaMet && test;
     }
 
-    // Six Buttons
+    // Six Buttons - Generic
+    if (searchJSON['6b']) {
+      range = searchJSON['6bRange'];
+      test = database.SongIntCompare2(song, 'normal6b', searchJSON['6bTerm'], (range ? diffRange : 0));
+      test = test || database.SongIntCompare2(song, 'hard6b', searchJSON['6bTerm'], (range ? diffRange : 0));
+      test = test || database.SongIntCompare2(song, 'maximum6b', searchJSON['6bTerm'], (range ? diffRange : 0));
+      test = test || database.SongIntCompare2(song, 'sc6b', searchJSON['6bTerm'], (range ? diffRange : 0));
+      criteriaMet = criteriaMet && test;
+    }
+
+    // Six Buttons - Chart Names
     if (searchJSON['6bnm']) {
       range = searchJSON['6bnmRange'];
-      test = database.SongIntCompare2(song, 'normal6b', searchJSON['6bnmTerm'], (range ? 1 : 0));
+      test = database.SongIntCompare2(song, 'normal6b', searchJSON['6bnmTerm'], (range ? diffRange : 0));
       criteriaMet = criteriaMet && test;
     }
     if (searchJSON['6bhd']) {
       range = searchJSON['6bhdRange'];
-      test = database.SongIntCompare2(song, 'hard6b', searchJSON['6bhdTerm'], (range ? 1 : 0));
+      test = database.SongIntCompare2(song, 'hard6b', searchJSON['6bhdTerm'], (range ? diffRange : 0));
       criteriaMet = criteriaMet && test;
     }
     if (searchJSON['6bmx']) {
       range = searchJSON['6bmxRange'];
-      test = database.SongIntCompare2(song, 'maximum6b', searchJSON['6bmxTerm'], (range ? 1 : 0));
+      test = database.SongIntCompare2(song, 'maximum6b', searchJSON['6bmxTerm'], (range ? diffRange : 0));
       criteriaMet = criteriaMet && test;
     }
     if (searchJSON['6bsc']) {
       range = searchJSON['6bscRange'];
-      test = database.SongIntCompare2(song, 'sc6b', searchJSON['6bscTerm'], (range ? 1 : 0));
+      test = database.SongIntCompare2(song, 'sc6b', searchJSON['6bscTerm'], (range ? diffRange : 0));
       criteriaMet = criteriaMet && test;
     }
 
-    // Eight Button
+    // Eight Buttons - Generic
+    if (searchJSON['8b']) {
+      range = searchJSON['8bRange'];
+      test = database.SongIntCompare2(song, 'normal8b', searchJSON['8bTerm'], (range ? diffRange : 0));
+      test = test || database.SongIntCompare2(song, 'hard8b', searchJSON['8bTerm'], (range ? diffRange : 0));
+      test = test || database.SongIntCompare2(song, 'maximum8b', searchJSON['8bTerm'], (range ? diffRange : 0));
+      test = test || database.SongIntCompare2(song, 'sc8b', searchJSON['8bTerm'], (range ? diffRange : 0));
+      criteriaMet = criteriaMet && test;
+    }
+
+    // Eight Buttons - Chart Names
     if (searchJSON['8bnm']) {
       range = searchJSON['8bnmRange'];
-      test = database.SongIntCompare2(song, 'normal8b', searchJSON['8bnmTerm'], (range ? 1 : 0));
+      test = database.SongIntCompare2(song, 'normal8b', searchJSON['8bnmTerm'], (range ? diffRange : 0));
       criteriaMet = criteriaMet && test;
     }
     if (searchJSON['8bhd']) {
       range = searchJSON['8bhdRange'];
-      test = database.SongIntCompare2(song, 'hard8b', searchJSON['8bhdTerm'], (range ? 1 : 0));
+      test = database.SongIntCompare2(song, 'hard8b', searchJSON['8bhdTerm'], (range ? diffRange : 0));
       criteriaMet = criteriaMet && test;
     }
     if (searchJSON['8bmx']) {
       range = searchJSON['8bmxRange'];
-      test = database.SongIntCompare2(song, 'maximum8b', searchJSON['8bmxTerm'], (range ? 1 : 0));
+      test = database.SongIntCompare2(song, 'maximum8b', searchJSON['8bmxTerm'], (range ? diffRange : 0));
       criteriaMet = criteriaMet && test;
     }
     if (searchJSON['8bsc']) {
       range = searchJSON['8bscRange'];
-      test = database.SongIntCompare2(song, 'sc8b', searchJSON['8bscTerm'], (range ? 1 : 0));
+      test = database.SongIntCompare2(song, 'sc8b', searchJSON['8bscTerm'], (range ? diffRange : 0));
       criteriaMet = criteriaMet && test;
     }
 
@@ -372,7 +414,7 @@ function chartName(song, searchJSON) {
   //
   let name = '';
 
-  // SC
+  // Chart Names - SC
   if (searchJSON['8bsc']) {
     name = `8B SC (${song.sc8b})`;
   } else if (searchJSON['6bsc']) {
@@ -382,7 +424,7 @@ function chartName(song, searchJSON) {
   } else if (searchJSON['4bsc']) {
     name = `4B SC (${song.sc4b})`;
   } else if (searchJSON['8bmx']) {
-    // Maximum
+    // Chart Names - Maximum
     name = `8B Maximum (${song.maximum8b})`;
   } else if (searchJSON['6bmx']) {
     name = `6B Maximum (${song.maximum6b})`;
@@ -391,7 +433,7 @@ function chartName(song, searchJSON) {
   } else if (searchJSON['4bmx']) {
     name = `4B Maximum (${song.maximum4b})`;
   } else if (searchJSON['8bhd']) {
-    // Hard
+    // Chart Names - Hard
     name = `8B Hard (${song.hard8b})`;
   } else if (searchJSON['6bhd']) {
     name = `6B Hard (${song.hard6b})`;
@@ -400,7 +442,7 @@ function chartName(song, searchJSON) {
   } else if (searchJSON['4bhd']) {
     name = `4B Hard (${song.hard4b})`;
   } else if (searchJSON['8bnm']) {
-    // Normal
+    // Chart Names - Normal
     name = `8B Normal (${song.normal8b})`;
   } else if (searchJSON['6bnm']) {
     name = `6B Normal (${song.normal6b})`;
@@ -408,6 +450,67 @@ function chartName(song, searchJSON) {
     name = `5B Normal (${song.normal5b})`;
   } else if (searchJSON['4bnm']) {
     name = `4B Normal (${song.normal4b})`;
+  }
+
+  // Generic - 8B
+  let diffNum = NaN;
+  let range = false;
+  if (name.length === 0 && searchJSON['8b']) {
+    diffNum = searchJSON['8bTerm'];
+    range = searchJSON['8bRange'];
+    if (Number.isNaN(diffNum)) {
+      name = '8B';
+    } else if (database.SongIntCompare2(song, 'sc8b', diffNum, (range ? diffRange : 0))) {
+      name = '8B SC';
+    } else if (database.SongIntCompare2(song, 'maximum8b', diffNum, (range ? diffRange : 0))) {
+      name = '8B Maximum';
+    } else if (database.SongIntCompare2(song, 'hard8b', diffNum, (range ? diffRange : 0))) {
+      name = '8B Hard';
+    } else if (database.SongIntCompare2(song, 'normal8b', diffNum, (range ? diffRange : 0))) {
+      name = '8B Normal';
+    }
+  } else if (name.length === 0 && searchJSON['6b']) {
+    diffNum = searchJSON['6bTerm'];
+    range = searchJSON['6bRange'];
+    if (Number.isNaN(diffNum)) {
+      name = '6B';
+    } else if (database.SongIntCompare2(song, 'sc6b', diffNum, (range ? diffRange : 0))) {
+      name = '6B SC';
+    } else if (database.SongIntCompare2(song, 'maximum6b', diffNum, (range ? diffRange : 0))) {
+      name = '6B Maximum';
+    } else if (database.SongIntCompare2(song, 'hard6b', diffNum, (range ? diffRange : 0))) {
+      name = '6B Hard';
+    } else if (database.SongIntCompare2(song, 'normal6b', diffNum, (range ? diffRange : 0))) {
+      name = '6B Normal';
+    }
+  } else if (name.length === 0 && searchJSON['5b']) {
+    diffNum = searchJSON['5bTerm'];
+    range = searchJSON['5bRange'];
+    if (Number.isNaN(diffNum)) {
+      name = '5B';
+    } else if (database.SongIntCompare2(song, 'sc5b', diffNum, (range ? diffRange : 0))) {
+      name = '5B SC';
+    } else if (database.SongIntCompare2(song, 'maximum5b', diffNum, (range ? diffRange : 0))) {
+      name = '5B Maximum';
+    } else if (database.SongIntCompare2(song, 'hard5b', diffNum, (range ? diffRange : 0))) {
+      name = '5B Hard';
+    } else if (database.SongIntCompare2(song, 'normal5b', diffNum, (range ? diffRange : 0))) {
+      name = '5B Normal';
+    }
+  } else if (name.length === 0 && searchJSON['4b']) {
+    diffNum = searchJSON['4bTerm'];
+    range = searchJSON['4bRange'];
+    if (Number.isNaN(diffNum)) {
+      name = '4B';
+    } else if (database.SongIntCompare2(song, 'sc4b', diffNum, (range ? diffRange : 0))) {
+      name = '4B SC';
+    } else if (database.SongIntCompare2(song, 'maximum4b', diffNum, (range ? diffRange : 0))) {
+      name = '4B Maximum';
+    } else if (database.SongIntCompare2(song, 'hard4b', diffNum, (range ? diffRange : 0))) {
+      name = '4B Hard';
+    } else if (database.SongIntCompare2(song, 'normal4b', diffNum, (range ? diffRange : 0))) {
+      name = '4B Normal';
+    }
   }
 
   //
@@ -447,9 +550,21 @@ function helpShort() {
   const exceptions = [
     'vocalist',
     'genre',
+    '4bnm',
+    '4bhd',
+    '4bmx',
     '4bsc',
+    '5bnm',
+    '5bhd',
+    '5bmx',
     '5bsc',
+    '6bnm',
+    '6bhd',
+    '6bmx',
     '6bsc',
+    '8bnm',
+    '8bhd',
+    '8bmx',
     '8bsc',
     'channel',
     'ps4',
@@ -461,7 +576,15 @@ function helpShort() {
 
 // helpFull()
 function helpFull() {
-  return database.HelpFromSearchParams(searchParams, identities[0]);
+  const exceptions = [
+    '4b',
+    '5b',
+    '6b',
+    '8b',
+  ];
+  let helpStr = database.HelpFromSearchParams(searchParams, identities[0], exceptions);
+  helpStr = helpStr.replace(/```.*?$/g, '```');
+  return helpStr;
 }
 
 // Setting up the exports

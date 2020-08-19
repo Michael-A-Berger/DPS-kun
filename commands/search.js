@@ -17,8 +17,11 @@ function help() {
 }
 
 // formatSearchPreview()
-function formatSearchPreview(searchParams, results, start) {
-  let str = `**Search Results** for \` ${searchParams} \``;
+function formatSearchPreview(chosenMod, searchJSON, results, start) {
+  let searchText = databaseMods[chosenMod].CommandIdentities[0];
+  searchText += ' ';
+  searchText += database.SearchObjToText(searchJSON);
+  let str = `**Search Results** for \` ${searchText} \``;
   for (let num = 0; num < resultsEmoji.length && start + num < results.length; num++) {
     str += `\n${resultsEmoji[num]} - **${results[start + num].name}**`
             + ` by ${results[start + num].artist}`;
@@ -44,7 +47,8 @@ function addPreviewReacts(sent, resultsLength, start) {
 // searchDatabase()
 function searchDatabase(message, chosenMod) {
   // Searching the database
-  const searchResults = databaseMods[chosenMod].Search(message.content);
+  const searchJSON = database.SearchTextToJSON(databaseMods[chosenMod].SearchParams, message.content);
+  const searchResults = databaseMods[chosenMod].Search(searchJSON);
 
   // Defining the message variables
   let sentMsg;
@@ -53,7 +57,7 @@ function searchDatabase(message, chosenMod) {
 
   // Defining the initial starting message
   let str = `<@${message.author.id}> 's `;
-  str += formatSearchPreview(message.content, searchResults, arrayStart);
+  str += formatSearchPreview(chosenMod, searchJSON, searchResults, arrayStart);
 
   // Defining the dynamic Reaction Filter method
   const filter = (reaction, user) => (user.id === message.author.id);
@@ -80,7 +84,7 @@ function searchDatabase(message, chosenMod) {
       reactOptions.time = startTime;
       sentMsg.delete().then(() => {
         str = `<@${message.author.id}> 's `;
-        str += formatSearchPreview(message.content, searchResults, arrayStart);
+        str += formatSearchPreview(chosenMod, searchJSON, searchResults, arrayStart);
         message.channel.send(str)
           .then((sent) => {
             sentMsg = sent;
@@ -96,7 +100,7 @@ function searchDatabase(message, chosenMod) {
       reactOptions.time = startTime;
       sentMsg.delete().then(() => {
         str = `<@${message.author.id}> 's `;
-        str += formatSearchPreview(message.content, searchResults, arrayStart);
+        str += formatSearchPreview(chosenMod, searchJSON, searchResults, arrayStart);
         message.channel.send(str)
           .then((sent) => {
             sentMsg = sent;

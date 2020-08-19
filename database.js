@@ -117,23 +117,25 @@ function searchTextToJSON(searchParams, searchText) {
     // FOREACH search parameter
     let range = false;
     searchNames.forEach((srchParam) => {
+      // Getting the colon split
+      let splitParam = currentParam.split(':');
+      
       // IF the parameter was not already found AND the parameter is a valid search parameter
-      if (!paramFound && currentParam.startsWith(srchParam)) {
+      if (!paramFound && splitParam[0] === srchParam) {
         // Set the search JSON parameter to true
         paramFound = true;
         searchJSON[srchParam] = true;
 
         // IF the parameter has a term, get the term
-        colonPos = currentParam.indexOf(':');
-        if (colonPos > -1) {
+        if (splitParam.length > 1) {
           switch (searchParams[srchParam].type) {
             case 'string':
-              searchJSON[`${srchParam}Term`] = currentParam.substr(colonPos + 1);
+              searchJSON[`${srchParam}Term`] = splitParam[1];
               break;
             case 'number':
-              range = (currentParam[colonPos + 1] === '~');
+              range = (splitParam[1][0] === '~');
               searchJSON[`${srchParam}Range`] = range;
-              searchJSON[`${srchParam}Term`] = parseFloat(currentParam.substr(colonPos + (range ? 2 : 1)));
+              searchJSON[`${srchParam}Term`] = parseFloat(splitParam[1].substr(range ? 1 : 0));
               break;
             default:
               // Do nothing
@@ -146,6 +148,42 @@ function searchTextToJSON(searchParams, searchText) {
 
   // Returning the search JSON
   return searchJSON;
+}
+
+// searchObjToText()
+function searchObjToText(searchJSON) {
+  // Defining the search text
+  let searchText = '';
+
+  // Getting the parameters from the search object
+  const searchKeys = Object.keys(searchJSON).filter((prop) => !(prop.endsWith('Term') || prop.endsWith('Range')));
+  searchKeys.forEach((key) => {
+    if (searchJSON[key]) {
+      searchText += ` ${key}`;
+      const keyTerm = searchJSON[`${key}Term`];
+      if (keyTerm !== undefined && !Number.isNaN(keyTerm) && keyTerm.toString().length > 0) {
+        switch (typeof keyTerm) {
+          case 'string':
+            searchText += `:${keyTerm}`;
+            break;
+          case 'number':
+            searchText += ':';
+            if (searchJSON[`${key}Range`]) {
+              searchText += '~';
+            }
+            searchText += keyTerm;
+            break;
+          default:
+            // Do nothing
+            break;
+        }
+      }
+    }
+  });
+  searchText = searchText.trim();
+
+  // Returning the search text
+  return searchText;
 }
 
 // songStringCompare()
@@ -367,6 +405,7 @@ module.exports = {
   ParseStringFromCSV: parseStringFromCSV,
   DefineSearchParam: defineSearchParam,
   SearchTextToJSON: searchTextToJSON,
+  SearchObjToText: searchObjToText,
   SongStringCompare2: songStringCompare,
   SongIntCompare2: songIntCompare,
   FormatArrayForString: formatArrayForString,

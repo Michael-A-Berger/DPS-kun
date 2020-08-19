@@ -388,12 +388,9 @@ function format(song) {
 }
 
 // search()
-function search(paramString) {
+function search(searchJSON) {
   // Defining the returning array
   let songMatches = [];
-
-  // Parsing the parameter string to a JSON object
-  const searchJSON = database.SearchTextToJSON(searchParams, paramString);
 
   // ==================================
   // ===== GETTING MATCHING SONGS =====

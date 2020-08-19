@@ -205,7 +205,7 @@ function formatChallenge(message, chosenMod) {
 
   // Getting the search object
   const searchJSON = database.SearchTextToJSON(database.Modules[chosenMod].SearchParams, message.content);
-  const validSongs = database.Modules[chosenMod].Search(message.content);
+  const validSongs = database.Modules[chosenMod].Search(searchJSON);
 
   // IF there is more than one search result...
   if (validSongs.length > 0) {
