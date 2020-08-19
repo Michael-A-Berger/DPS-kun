@@ -461,55 +461,58 @@ function chartName(song, searchJSON) {
     if (Number.isNaN(diffNum)) {
       name = '8B';
     } else if (database.SongIntCompare2(song, 'sc8b', diffNum, (range ? diffRange : 0))) {
-      name = '8B SC';
+      name = `8B SC (${song.sc8b})`;
     } else if (database.SongIntCompare2(song, 'maximum8b', diffNum, (range ? diffRange : 0))) {
-      name = '8B Maximum';
+      name = `8B Maximum (${song.maximum8b})`;
     } else if (database.SongIntCompare2(song, 'hard8b', diffNum, (range ? diffRange : 0))) {
-      name = '8B Hard';
+      name = `8B Hard (${song.hard8b})`;
     } else if (database.SongIntCompare2(song, 'normal8b', diffNum, (range ? diffRange : 0))) {
-      name = '8B Normal';
+      name = `8B Normal (${song.normal8b})`;
     }
   } else if (name.length === 0 && searchJSON['6b']) {
+    // Generic - 6B
     diffNum = searchJSON['6bTerm'];
     range = searchJSON['6bRange'];
     if (Number.isNaN(diffNum)) {
       name = '6B';
     } else if (database.SongIntCompare2(song, 'sc6b', diffNum, (range ? diffRange : 0))) {
-      name = '6B SC';
+      name = `6B SC (${song.sc6b})`;
     } else if (database.SongIntCompare2(song, 'maximum6b', diffNum, (range ? diffRange : 0))) {
-      name = '6B Maximum';
+      name = `6B Maximum (${song.maximum6b})`;
     } else if (database.SongIntCompare2(song, 'hard6b', diffNum, (range ? diffRange : 0))) {
-      name = '6B Hard';
+      name = `6B Hard (${song.hard6b})`;
     } else if (database.SongIntCompare2(song, 'normal6b', diffNum, (range ? diffRange : 0))) {
-      name = '6B Normal';
+      name = `6B Normal (${song.normal6b})`;
     }
   } else if (name.length === 0 && searchJSON['5b']) {
+    // Generic - 5B
     diffNum = searchJSON['5bTerm'];
     range = searchJSON['5bRange'];
     if (Number.isNaN(diffNum)) {
       name = '5B';
     } else if (database.SongIntCompare2(song, 'sc5b', diffNum, (range ? diffRange : 0))) {
-      name = '5B SC';
+      name = `5B SC (${song.sc5b})`;
     } else if (database.SongIntCompare2(song, 'maximum5b', diffNum, (range ? diffRange : 0))) {
-      name = '5B Maximum';
+      name = `5B Maximum (${song.maximum5b})`;
     } else if (database.SongIntCompare2(song, 'hard5b', diffNum, (range ? diffRange : 0))) {
-      name = '5B Hard';
+      name = `5B Hard (${song.hard5b})`;
     } else if (database.SongIntCompare2(song, 'normal5b', diffNum, (range ? diffRange : 0))) {
-      name = '5B Normal';
+      name = `5B Normal (${song.normal5b})`;
     }
   } else if (name.length === 0 && searchJSON['4b']) {
+    // Generic - 4B
     diffNum = searchJSON['4bTerm'];
     range = searchJSON['4bRange'];
     if (Number.isNaN(diffNum)) {
       name = '4B';
     } else if (database.SongIntCompare2(song, 'sc4b', diffNum, (range ? diffRange : 0))) {
-      name = '4B SC';
+      name = `4B SC (${song.sc4b})`;
     } else if (database.SongIntCompare2(song, 'maximum4b', diffNum, (range ? diffRange : 0))) {
-      name = '4B Maximum';
+      name = `4B Maximum (${song.maximum4b})`;
     } else if (database.SongIntCompare2(song, 'hard4b', diffNum, (range ? diffRange : 0))) {
-      name = '4B Hard';
+      name = `4B Hard (${song.hard4b})`;
     } else if (database.SongIntCompare2(song, 'normal4b', diffNum, (range ? diffRange : 0))) {
-      name = '4B Normal';
+      name = `4B Normal (${song.normal4b})`;
     }
   }
 
